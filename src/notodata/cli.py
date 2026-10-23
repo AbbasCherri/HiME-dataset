@@ -271,12 +271,20 @@ def _working(ctx: Context):
     return kept, flags, res, decision
 
 
+def _origin() -> tuple[float, float]:
+    """The one projection origin: the mean over ALL source rows (spec), kept or not."""
+    from notodata import geometry
+
+    df = _buildings(need_labels=False)
+    return geometry.reference_point(df["lat"], df["lon"])
+
+
 def _frame(ctx: Context):
     """The working frame stages 12+ use: kept rows, labels, flags and projected metres."""
     from notodata import geometry
 
     kept, flags, res, decision = _working(ctx)
-    lat0, lon0 = geometry.reference_point(kept["lat"], kept["lon"])
+    lat0, lon0 = _origin()
     df = kept.merge(flags, on="building_id", validate="1:1")
     df["x_m"], df["y_m"] = geometry.project(df["lat"], df["lon"], lat0, lon0)
     return df, res, decision
@@ -297,7 +305,7 @@ def stage_source(ctx: Context, args) -> int:
     )
     md5 = ctx.gpkg_md5 or CONFIG.buildings.md5
     grid = source.fetch_grid(get=ctx.get or source.http_get)
-    source.record_source_file(gpkg)
+    gpkg_sha = source.record_source_file(gpkg)["sha256"]
 
     def compute(out: Path) -> None:
         table, checks = source.build_source_table(
@@ -306,7 +314,14 @@ def stage_source(ctx: Context, args) -> int:
         source.write_source_table(table, out)
         _write_changed(ctx.reports() / "source_checks.csv", _csv_bytes(_checks_frame(checks)))
 
-    _cached(ctx, "source", source.source_table_path(), [gpkg, grid], {"gpkg_md5": md5}, compute)
+    _cached(
+        ctx,
+        "source",
+        source.source_table_path(),
+        [grid],
+        {"gpkg_md5": md5, "gpkg_sha256": gpkg_sha},
+        compute,
+    )
     return EXIT_OK
 
 
@@ -368,16 +383,15 @@ def stage_labels(ctx: Context, args) -> int:
 
 
 def stage_geometry(ctx: Context, args) -> int:
-    from notodata import geometry, source
+    from notodata import source
 
     src = _need(source.source_table_path(), "run `notodata source`")
-    df = _buildings(need_labels=False)
-    lat0, lon0 = geometry.reference_point(df["lat"], df["lon"])
+    lat0, lon0 = _origin()
     ref = {
         "basis": "all source rows, before any coverage restriction",
         "lat0": f"{lat0:.10f}",
         "lon0": f"{lon0:.10f}",
-        "n_rows": len(df),
+        "n_rows": len(_buildings(need_labels=False)),
     }
     _write_reports(ctx, "geometry", {ctx.reports() / "geometry_reference.json": _json_bytes(ref)},
                    [src])  # fmt: skip
@@ -740,6 +754,7 @@ def stage_table(ctx: Context, args) -> int:
             fold_cols.reset_index(drop=True),
             _read_index(decision["post_layer"]),
             _read_index(pre) if pre is not None and res.pre_available else None,
+            origin=_origin(),
         )
         table.write_table(built, res.pre_available)
 
@@ -841,7 +856,7 @@ def _rebuild(ctx: Context, entries: dict[str, str], layers: list[str], clean: bo
                       gpkg_md5=ctx.gpkg_md5, root=root)  # fmt: skip
         with _Swapped(home):
             for argv in _rebuild_plan(entries, layers):
-                main(argv, sub)
+                _run_or_stop(argv, sub)
             problems = manifest.verify_manifest(ctx.root / MANIFEST_NAME, layers, root=root)
         hint = _tile_hint(layers, original, home) if problems and clean else ""
     return problems, hint
@@ -870,12 +885,26 @@ def stage_verify(ctx: Context, args) -> int:
 # -- build ------------------------------------------------------------------
 
 
+class StageFailed(Exception):
+    """A sub-stage returned a nonzero exit code; `main` returns that code."""
+
+    def __init__(self, code: int):
+        self.code = code
+        super().__init__(f"sub-stage exited with {code}")
+
+
+def _run_or_stop(argv: list[str], ctx: Context) -> None:
+    code = main(argv, ctx)
+    if code:
+        raise StageFailed(code)
+
+
 def stage_build(ctx: Context, args) -> int:
     """Every stage except the two audit stages and `embed`; stops at the audit if undecided."""
     layers = ["--layers", args.layers] if args.layers else []
     for argv in (["source"], ["labels"], ["geometry"], ["fetch", *layers], ["chips", *layers],
                  ["coverage"]):  # fmt: skip
-        main(argv, ctx)
+        _run_or_stop(argv, ctx)
     if not (ctx.reports() / "imagery_decision.json").exists():
         print(
             "audit pending: run `audit-export`, mark audit/marks.csv by hand, then "
@@ -884,7 +913,7 @@ def stage_build(ctx: Context, args) -> int:
         return EXIT_OK
     for argv in (["imagery"], ["spatial"], ["folds"], ["splits"], ["clients"], ["table"],
                  ["manifest"], ["report"]):  # fmt: skip
-        main(argv, ctx)
+        _run_or_stop(argv, ctx)
     return EXIT_OK
 
 
@@ -965,12 +994,18 @@ def main(argv: list[str] | None = None, ctx: Context | None = None) -> int:
     if args.stage is None:
         return EXIT_OK
     from notodata.coverage import NeedsReaudit
+    from notodata.source import SourceError
 
     try:
         return args.func(ctx or Context(), args)
     except NeedsReaudit as exc:
         print(f"{exc}", file=sys.stderr)
         return EXIT_NEEDS_REAUDIT
+    except StageFailed as exc:
+        return exc.code
+    except SourceError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_MISSING_INPUT
     except CliError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_MISSING_INPUT

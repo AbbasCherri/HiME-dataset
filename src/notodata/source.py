@@ -54,7 +54,7 @@ SCHEMA = pa.schema(
         ("lon", pa.float64()),
         *[(c, pa.float64()) for c in CONFIG.seismic_columns],
         ("damage_val", pa.float64()),
-        ("label", pa.float64()),
+        ("damage_2", pa.float64()),
         ("municipality", pa.string()),
         ("grid_outside", pa.int8()),
         ("bbox_outside", pa.int8()),
@@ -133,24 +133,26 @@ def read_buildings(path: Path | str, expected_md5: str = CONFIG.buildings.md5) -
     """Read the gpkg after verifying its MD5; one row per footprint, centroid lon/lat.
 
     `building_id` is the GeoPackage `fid`. `damage_val` is the primary code column; the
-    shipped file's second code column `damage_2` is carried as `label`, the fallback.
+    shipped file's second code column `damage_2` is carried only as a diagnostic: it never
+    fills or overrides `damage_val`.
     """
     found = md5_file(path)
     if found != expected_md5:
         raise SourceError(f"MD5 of {path} is {found}, expected {expected_md5}")
     gdf = gpd.read_file(path, engine="pyogrio", fid_as_index=True)
+    if CONFIG.label_column not in gdf:
+        raise SourceError(f"{path} has no {CONFIG.label_column!r} column; found {list(gdf)}")
     lon, lat = _centroids(gdf.geometry)
     if not (np.isfinite(lon).all() and np.isfinite(lat).all()):
         bad = int((~(np.isfinite(lon) & np.isfinite(lat))).sum())
         raise SourceError(f"{bad} footprints have non-finite centroid coordinates")
-    second = CONFIG.label_fallback_column
     return pd.DataFrame(
         {
             "building_id": gdf.index.to_numpy(dtype="int64"),
             "lat": lat,
             "lon": lon,
             CONFIG.label_column: gdf[CONFIG.label_column].to_numpy(dtype="float64"),
-            second: gdf["damage_2"].to_numpy(dtype="float64")
+            "damage_2": gdf["damage_2"].to_numpy(dtype="float64")
             if "damage_2" in gdf
             else np.full(len(gdf), np.nan),
             "municipality": gdf["municipality"].astype("string").to_numpy(dtype=object),
@@ -199,10 +201,18 @@ def _axes(spec: ET.Element) -> tuple[np.ndarray, np.ndarray]:
     return lon, lat
 
 
+_NODE_TOL = 0.1
+"""Nodes may sit this fraction of a cell off the lattice (files print rounded coordinates)."""
+
+
 def _node_index(coord: np.ndarray, axis: np.ndarray) -> np.ndarray:
     step = (axis[-1] - axis[0]) / (len(axis) - 1)
     idx = np.rint((coord - axis[0]) / step).astype(int)
-    if (idx < 0).any() or (idx >= len(axis)).any() or not np.allclose(axis[idx], coord, atol=1e-6):
+    if (
+        (idx < 0).any()
+        or (idx >= len(axis)).any()
+        or not np.allclose(axis[idx], coord, atol=_NODE_TOL * step, rtol=0)
+    ):
         raise SourceError("grid nodes do not lie on the declared lattice")
     return idx
 
@@ -225,6 +235,8 @@ def parse_grid(xml: bytes) -> Grid:
     for name in _FIELDS:
         arr = np.full((len(lat), len(lon)), np.nan)
         arr[iy, ix] = data[:, names.index(name)]
+        if np.isnan(arr).any():
+            raise SourceError(f"grid field {name} has missing nodes (duplicate or absent nodes)")
         fields[name] = arr
     return Grid(lon=lon, lat=lat, fields=fields, units=units)
 
@@ -256,6 +268,12 @@ def _outside_bbox(lat: np.ndarray, lon: np.ndarray) -> np.ndarray:
     return (lat < b.lat_min) | (lat > b.lat_max) | (lon < b.lon_min) | (lon > b.lon_max)
 
 
+def _disagreement(df: pd.DataFrame) -> int:
+    """Rows where `damage_2` is present and differs from `damage_val` (diagnostic only)."""
+    both = df["damage_val"].notna() & df["damage_2"].notna()
+    return int((df.loc[both, "damage_val"] != df.loc[both, "damage_2"]).sum())
+
+
 def build_source_table(buildings: pd.DataFrame, grid: Grid) -> tuple[pd.DataFrame, dict]:
     """Attach the sampled seismic columns; keep every row and count the awkward ones."""
     lon, lat = buildings["lon"].to_numpy(), buildings["lat"].to_numpy()
@@ -270,6 +288,7 @@ def build_source_table(buildings: pd.DataFrame, grid: Grid) -> tuple[pd.DataFram
         "n_rows": len(out),
         "n_outside_bbox": int(out["bbox_outside"].sum()),
         "n_outside_grid": int(out["grid_outside"].sum()),
+        "n_damage_2_disagree": _disagreement(out),
         "n_nonpositive": {
             c: int((out[c] <= 0).sum()) for c in CONFIG.seismic_columns if out[c].notna().any()
         },

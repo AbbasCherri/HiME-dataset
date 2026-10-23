@@ -79,12 +79,14 @@ def assemble_table(
     fold_cols: pd.DataFrame,
     post_index: pd.DataFrame,
     pre_index: pd.DataFrame | None,
+    origin: tuple[float, float] | None = None,
 ) -> pd.DataFrame:
     """Join the stage outputs into the table; every input is aligned by row position.
 
     `buildings` carries ids, lat, lon and the seismic columns; `label_cols` is
     `labels.map_labels`, `flags` is `imagery.flags_from_indexes`, `fold_cols` is
-    `folds.assign_folds`. The projection origin is the mean over ALL rows.
+    `folds.assign_folds`. The projection origin is `origin` if given
+    (the build passes the mean over ALL source rows), else the mean over `buildings`.
     """
     n = len(buildings)
     for name, part in (("label_cols", label_cols), ("flags", flags), ("fold_cols", fold_cols)):
@@ -93,7 +95,7 @@ def assemble_table(
     ids = buildings["building_id"].reset_index(drop=True).astype("int64")
     if not (flags["building_id"].reset_index(drop=True) == ids).all():
         raise ValueError("flags rows are not in the same order as buildings")
-    lat0, lon0 = geometry.reference_point(buildings["lat"], buildings["lon"])
+    lat0, lon0 = origin or geometry.reference_point(buildings["lat"], buildings["lon"])
     x, y = geometry.project(buildings["lat"], buildings["lon"], lat0, lon0)
     lab = label_cols.reset_index(drop=True)
     flg = flags.reset_index(drop=True)

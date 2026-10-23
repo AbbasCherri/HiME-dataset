@@ -116,12 +116,6 @@ def test_source_stage_recomputes_when_the_grid_changes(env):
     assert [r["recomputed"] for r in _logs() if r["stage"] == "source"] == [True, True]
 
 
-def test_source_stage_aborts_on_a_wrong_md5(env):
-    bad = cli.Context(**{**env.__dict__, "gpkg_md5": "0" * 32})
-    with pytest.raises(source.SourceError, match="MD5"):
-        run(bad, "source")
-
-
 def test_run_log_carries_the_required_fields(env):
     run(env, "source")
     record = _logs()[-1]
@@ -232,3 +226,28 @@ def test_client_counts_come_from_config():
     from notodata.config import CLIENT_COUNTS
 
     assert CLIENT_COUNTS == (50, 100, 200)
+
+
+def test_build_propagates_a_failing_sub_stage(env):
+    (paths.raw_dir() / CONFIG.buildings.filename).unlink()
+    assert run(env, "build", *LAYER_ARGS) == cli.EXIT_MISSING_INPUT
+
+
+def test_a_wrong_md5_is_a_clean_exit_2(env, capsys):
+    bad = cli.Context(**{**env.__dict__, "gpkg_md5": "0" * 32})
+    assert run(bad, "source") == cli.EXIT_MISSING_INPUT
+    assert "MD5" in capsys.readouterr().err
+
+
+def test_geometry_reference_is_the_table_origin(env):
+    from notodata import geometry
+
+    _upto_audit_export(env)
+    _fill_marks(lambda r: "no_visible_damage")
+    _ingest(env)
+    _after_decision(env)
+    ref = json.loads((env.root / "reports" / "geometry_reference.json").read_text())
+    table = pd.read_parquet(paths.buildings_table_path())
+    x, y = geometry.project(table["lat"], table["lon"], float(ref["lat0"]), float(ref["lon0"]))
+    assert abs(x - table["x_m"]).max() < 1e-3  # the reference is printed to 10 decimals
+    assert abs(y - table["y_m"]).max() < 1e-3

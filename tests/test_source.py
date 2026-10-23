@@ -38,7 +38,12 @@ def _value(field: str, u: float, v: float) -> float:
 
 
 def make_grid_xml(
-    version: str = "10", event: str = "us6000m0xl", units: dict | None = None
+    version: str = "10",
+    event: str = "us6000m0xl",
+    units: dict | None = None,
+    step: float = STEP,
+    decimals: int = 4,
+    duplicate_node: bool = False,
 ) -> bytes:
     units = {k: v[0] for k, v in _FIELDS.items()} | (units or {})
     fields = "".join(
@@ -51,15 +56,19 @@ def make_grid_xml(
     for j in range(NLAT - 1, -1, -1):  # real grids run north to south
         for i in range(NLON):
             vals = " ".join(f"{_value(f, i, j):.6f}" for f in _ORDER)
-            rows.append(f"{LON0 + i * STEP:.4f} {LAT0 + j * STEP:.4f} {vals} 600.0")
+            rows.append(
+                f"{LON0 + i * step:.{decimals}f} {LAT0 + j * step:.{decimals}f} {vals} 600.0"
+            )
+    if duplicate_node:
+        rows[-1] = rows[0]
     return (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
         '<shakemap_grid xmlns="http://earthquake.usgs.gov/eqcenter/shakemap" '
         f'event_id="{event}" shakemap_id="{event}" shakemap_version="{version}" '
         'shakemap_originator="us">\n'
         f'<grid_specification lon_min="{LON0}" lat_min="{LAT0}" '
-        f'lon_max="{LON0 + (NLON - 1) * STEP}" lat_max="{LAT0 + (NLAT - 1) * STEP}" '
-        f'nominal_lon_spacing="{STEP}" nominal_lat_spacing="{STEP}" '
+        f'lon_max="{LON0 + (NLON - 1) * step}" lat_max="{LAT0 + (NLAT - 1) * step}" '
+        f'nominal_lon_spacing="{step}" nominal_lat_spacing="{step}" '
         f'nlon="{NLON}" nlat="{NLAT}"/>\n' + fields + "<grid_data>\n" + "\n".join(rows) + "\n"
         "</grid_data>\n</shakemap_grid>\n"
     ).encode()
@@ -105,9 +114,10 @@ def test_labels_are_normalised_to_float_columns(tmp_path):
     md5 = make_gpkg(path, [(136.2, 37.2), (136.4, 37.4)], damage_val=[99, 1], damage_2=[99, 1])
     df = source.read_buildings(path, expected_md5=md5)
     assert df["damage_val"].dtype == np.float64
-    assert df["label"].dtype == np.float64
+    assert df["damage_2"].dtype == np.float64
     assert df["damage_val"].tolist() == [99.0, 1.0]
-    assert df["label"].tolist() == [99.0, 1.0]
+    assert df["damage_2"].tolist() == [99.0, 1.0]
+    assert "label" not in df
 
 
 def test_non_finite_coordinates_abort(tmp_path):
@@ -256,3 +266,43 @@ def test_source_table_frame_has_the_expected_columns(tmp_path):
     assert isinstance(table, pd.DataFrame)
     expected = [f.name for f in source.SCHEMA]
     assert list(table.columns) == expected
+
+
+def test_nodes_rounded_to_four_decimals_on_a_one_arc_minute_lattice_parse():
+    grid = source.parse_grid(make_grid_xml(step=1 / 60, decimals=4))
+    assert grid.fields["PGA"].shape == (NLAT, NLON)
+    assert grid.fields["PGA"][2, 3] == pytest.approx(_value("PGA", 3, 2))
+
+
+def test_duplicate_nodes_are_rejected():
+    with pytest.raises(source.SourceError, match="missing nodes"):
+        source.parse_grid(make_grid_xml(duplicate_node=True))
+
+
+def test_hand_computed_bilinear_value():
+    # MMI = 5 + u + 0.5 v + 0.25 u v; at u = 1.25, v = 0.5: 5 + 1.25 + 0.25 + 0.15625
+    values, _ = _sample([LON0 + 1.25 * STEP], [LAT0 + 0.5 * STEP])
+    assert values["MMI_original"][0] == pytest.approx(6.65625, abs=1e-12)
+
+
+def test_damage_2_never_fills_damage_val_and_missing_damage_val_is_an_error(tmp_path):
+    path = tmp_path / "b.gpkg"
+    gdf = gpd.GeoDataFrame(
+        {"damage_2": [1], "municipality": ["m"]},
+        geometry=[Point(136.2, 37.2).buffer(1e-5)],
+        crs="EPSG:4326",
+    )
+    gdf.to_file(path, layer="v2.5", driver="GPKG", engine="pyogrio")
+    md5 = hashlib.md5(path.read_bytes()).hexdigest()
+    with pytest.raises(source.SourceError, match="damage_val"):
+        source.read_buildings(path, expected_md5=md5)
+
+
+def test_damage_2_disagreement_is_counted_not_applied(tmp_path):
+    path = tmp_path / "b.gpkg"
+    md5 = make_gpkg(path, [(136.2, 37.2), (136.4, 37.4)], damage_val=[0, 1], damage_2=[1, 1])
+    table, checks = source.build_source_table(
+        source.read_buildings(path, expected_md5=md5), source.parse_grid(make_grid_xml())
+    )
+    assert checks["n_damage_2_disagree"] == 1
+    assert table["damage_val"].tolist() == [0.0, 1.0]
