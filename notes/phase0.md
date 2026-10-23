@@ -858,3 +858,315 @@ or building one.
     (section 1)
 
 **STOP 1 is pending human sign-off.**
+
+## Phase 0 addendum: raw data source investigation
+
+Date run: 2026-10-23. HEAD at the time of the run `ed4831a`.
+
+The build plan assumed one pinned Hugging Face dataset would supply the
+per-building rows. `AbbasABC/HiME-dataset` is empty (section 3) and
+`AbbasABC/HFL-Dataset` is ruled out as a source. The project is to assemble the
+rows from open primary sources instead: GSI's aerial damage interpretation for
+building labels, and USGS ShakeMap for shaking. This section records what those
+sources actually are and what they contain. It does not design the pipeline.
+
+The short result is that the first source does not exist in the form assumed, and
+the dataset the old pipeline was actually built on has been identified.
+
+### A.1 GSI: no per-building damage product exists for this event
+
+**Confirmed: GSI published no building-by-building damage classification for the
+2024 Noto earthquake.** GSI's interpretation products for this event are *area*
+polygons, not buildings.
+
+The GSI disaster page `https://www.gsi.go.jp/BOUSAI/20240101_noto_earthquake.html`
+(still unreachable by direct HTTP from here, as in section 5.1; read through a
+fetching proxy) lists these interpretation products:
+
+| Product as published | What it is | Released |
+| --- | --- | --- |
+| `空中写真判読による津波浸水域（推定）` | Estimated tsunami inundation area | 5 Jan 2024, updated 19 Jan |
+| `空中写真等の画像判読による輪島市中心の火災焼失範囲（推定）` | Estimated fire-burn extent, central Wajima | 4 Jan 2024, updated 12 Jan |
+| `災害現況図` | Disaster situation map | 29 Jan 2024 |
+
+Slope-failure and sediment-distribution maps (`斜面崩壊・堆積分布図`) are also
+published, per GSI's own response report and the catalogues below. GSI's response
+report `https://www.gsi.go.jp/common/000264884.pdf` lists 判読図, 分布図, 浸水域
+and 正射画像, and does not claim any building-unit damage determination anywhere.
+
+Two independent catalogues of published Noto data agree:
+
+- `https://wata909.github.io/R060101_Noto_Peninsula_EQ_QGIS/`: GSI entries are
+  slope collapse and sediment, tsunami inundation, and orthophotos. No
+  per-building damage dataset from any publisher.
+- `https://masumura.ues.tmu.ac.jp/dr_gis/2024_noto_peninsula_earthquake/`: the
+  nearest entry is N2EM, below.
+
+Japan's national open-data catalogue, the G-Spatial Information Center, was
+searched directly:
+
+```console
+$ curl -sG "https://www.geospatial.jp/ckan/api/3/action/package_search" --data-urlencode "q=能登半島地震"
+count 22
+```
+
+Of the 22 results, exactly one is about building damage: `2024noto`,
+`令和6年能登半島地震住家被害`, published by N2EM, licence `政府標準利用規約`. Its
+documented fields are:
+
+> 自治体コード 市町村名 ふりがな 役所緯度 役所経度 全壊 大規模半壊 半壊 一部損壊 床上浸水 床下浸水 合計 報番 発表日時 出典 出典URL 備考
+
+That is **one row per municipality**, located at the city hall
+(`役所緯度`/`役所経度`), with damage as **counts** in the Cabinet Office categories
+全壊 / 大規模半壊 / 半壊 / 一部損壊 plus two flood classes. It cannot supply a
+per-building label and is not a candidate.
+
+Licence: the GSI disaster page states
+`国土地理院コンテンツ利用規約に従い、出典を明示いただくだけで、転載も含めご自由にお使いいただけます。`
+This is the class-2 GSI term already quoted in section 6.2. No product-specific
+terms were found.
+
+Items 2–6 of the original question (format, CRS, geometry, class scheme, coverage,
+feature count of a GSI building product) have no answer, because the product does
+not exist.
+
+### A.2 The actual per-building source: the Tohoku University damage dataset
+
+The per-building data the brief describes comes from a peer-reviewed open
+dataset, not from GSI directly:
+
+- **Paper.** Vescovo, R., Adriano, B., Mas, E., Wiguna, S., Mizutani, A., Ho, C. Y.,
+  Morales, J., Dong, X., Ishii, S., Ezaki, Y., Wako, K., Tanaka, S. and
+  Koshimura, S.: *The 2024 Noto Peninsula earthquake building damage dataset:
+  multi-source visual assessment*, Earth Syst. Sci. Data, 17, 5259–5276, 2025,
+  `https://doi.org/10.5194/essd-17-5259-2025`.
+- **Data.** Zenodo, concept DOI `10.5281/zenodo.11055711`. Latest version 2.5,
+  record `15192949`, April 2025, file `Noto_Peninsula_Damage_2_5.gpkg`,
+  47,853,568 bytes, MD5 `280e9c53cb45086786c20ed0b2c21ffb`. The record's own DOI
+  field is set to the paper's preprint DOI `10.5194/essd-2024-363`, not a Zenodo
+  DOI. Version 2.4 is record `14650106`, DOI `10.5281/zenodo.14650106`.
+- **Licence.** CC-BY-4.0 (Zenodo API, `license.id = cc-by-4.0`).
+
+The file was downloaded, its MD5 matched the published value, and its schema was
+read directly from the GeoPackage with `sqlite3`:
+
+```console
+gpkg_contents: ('v2.5', 'features', 136.670683417, 37.000347909, 137.360662401, 37.529975389, srs 4326)
+
+layer v2.5, 140208 rows
+  fid INTEGER | geom MULTIPOLYGON | s_fid TEXT | source TEXT | damage_val MEDIUMINT
+  municipality TEXT | conf TEXT | damage_2 MEDIUMINT | GSI_fire INTEGER
+  GSI_tsunami INTEGER | GSI_slope_failure INTEGER | USGS_MMI REAL
+```
+
+The paper's Table 5 calls the two damage columns `damage` and `damage_val`; the
+shipped v2.5 file calls them `damage_val` and `damage_2`. The file is
+authoritative.
+
+**Format:** GeoPackage, one layer. **CRS:** EPSG:4326 (WGS 84), stated in the
+paper and confirmed by `srs_id 4326`. **Geometry:** one MultiPolygon footprint
+per building. **Footprints:** GSI 基盤地図情報 ("basic map information",
+`https://fgd.gsi.go.jp/download/`), JIS X 0410 mesh tiles 553645–553647,
+553655–553657, 553665–553667 and 553675–553677. Where the GSI footprint did not
+match pre-event imagery, the authors coded it 99 and drew new polygons; 25,685
+buildings (18.3%) were digitised by hand. **Coverage:** Suzu, Noto, Wajima, Nanao,
+Shika and Anamizu.
+
+#### A.2.1 Why this is the dataset the brief and the old pipeline used
+
+Three independent matches:
+
+1. **The bounding box.** The file's extent is lon 136.670683–137.360662,
+   lat 37.000348–37.529975. The brief's box is lon 136.677–137.356,
+   lat 37.005–37.526: the same box pulled slightly inward on all four sides.
+2. **The label column and codes.** `damage_val`, with values exactly
+   {0, 1, 9, 99}, is the brief's primary label column and code set
+   (spec lines 39–41).
+3. **The district keys.** `municipality` values are triples such as
+   `石川県、珠洲市、三崎町`. The old private repository's chip directories have the
+   same form, e.g. `Images/石川県、能登町、字時長山口/building_101644_z18.tif`
+   (section 3.6).
+
+#### A.2.2 The damage classes, quoted
+
+Four classes. From the paper:
+
+> Each building was classified into four classes: survived, destroyed, obstructed
+> view through human inspection, and missing or inconsistent.
+
+From section 2.2 of the paper, which gives the codes:
+
+> Each aerial was screened for cloud cover and potentially obstructed buildings
+> were marked as 9 unless the oblique imagery provided a clear view of the
+> building, in which case the oblique was used to classify the building.
+> For each building we checked first against the pre-disaster aerial for footprint
+> geometry consistency; in cases of mismatch or ambiguity we classified the
+> existing polygon as 99 and added a new polygon (based on the pre-disaster aerial)
+> to the database.
+> In the case of coherence between the footprint polygon and the pre-disaster
+> aerial, we classified the building as 0 or 1 (survived/destroyed) using the
+> post-disaster vertical imagery and corroborated against the oblique.
+
+| Code | Meaning as published |
+| --- | --- |
+| 0 | survived |
+| 1 | destroyed |
+| 9 | obstructed view through human inspection |
+| 99 | missing or inconsistent (the footprint did not match pre-event imagery; a replacement polygon was drawn) |
+
+The scheme is binary destroyed/survived plus two "no label" codes. It is not a
+graded damage scale, so the D4 branch structure in the plan still fits.
+
+#### A.2.3 Counts
+
+```console
+damage_val, whole file:          0: 112275   1: 3461   9: 9437   99: 15035   total 140208
+damage_val, inside brief bbox:   0: 110157   1: 3440   9: 8262   99: 14869   total 136728
+brief's old counts (spec l.41):  0: 104917   1: 3407   9: 8365   99: 12154   total 128843
+```
+
+The bbox figure counts polygons whose envelope lies entirely inside the box. The
+v2.4 record also states 140,208 entries, so 128,843 is neither a published version
+total nor the bbox clip. The old pipeline evidently applied further filtering that
+cannot be recovered (section 1), and the old counts stay a comparison column only.
+
+#### A.2.4 What the file does not contain
+
+Of the brief's seven seismic columns, the file carries one candidate. `USGS_MMI`
+has no nulls and only 10 distinct values: 7.2, 7.4, …, 9.0, in steps of exactly
+0.2. There is no PGA, PGV or spectral acceleration attribute. The paper's PGA
+figure is credited to KKE with NIED, not USGS, and is not stored per building.
+The paper cites the USGS intensity page for this event, last accessed
+25 April 2024. It does not say how `USGS_MMI` was sampled or from which ShakeMap
+version.
+
+### A.3 USGS ShakeMap: exists, covers the box
+
+**Confirmed.** Event `us6000m0xl`, "M 7.5 - 2024 Noto Peninsula, Japan
+Earthquake", 2024-01-01T07:10:09Z, epicentre 37.4874 N 137.2710 E, depth 10 km.
+Event page `https://earthquake.usgs.gov/earthquakes/eventpage/us6000m0xl`.
+
+```console
+$ curl -s "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2024-01-01&endtime=2024-01-02&minmagnitude=7.0"
+count 1 ... "id":"us6000m0xl" ... "types":",dyfi,...,losspager,...,shakemap,"
+```
+
+One ShakeMap product. Source `us` ("USGS NEIC ShakeMap"), **version 10**,
+processed 2024-03-09T18:30:39Z, ShakeMap code `4.2.1.dev0`, status `automatic`
+(not reviewed), GMICE `WGRW12`, GMPE a custom mix of `subduction_crustal` and
+`subduction_interface_nshmp2014`. It is constrained by 404 seismic stations and 12
+intensity observations. Version-pinned product base:
+
+`https://earthquake.usgs.gov/product/shakemap/us6000m0xl/us/1710009202676/download/`
+
+| File | USGS title | Content |
+| --- | --- | --- |
+| `grid.xml` (7,559,752 B) | XML Grid | LON, LAT, MMI, PGA, PGV, PSA03, PSA10, PSA30, SVEL per node |
+| `uncertainty.xml` | Uncertainty Grid | standard deviations on the same grid |
+| `shape.zip` (8,509,831 B) | ShakeMap Shape Files | contour polygons for mi, pga, pgv, psa0p3, psa1p0, psa3p0 |
+| `raster.zip` (5,255,047 B) | ESRI Raster Files | `{mmi,pga,pgv,psa0p3,psa1p0,psa3p0}_{mean,std}.flt` |
+| `info.json` | Supplemental Information | GMPE, GMICE, grid spacing, maxima |
+
+All six IMs the brief needs are present.
+
+**Grid.** 416 × 324 = 134,784 nodes, spacing 0.0166667° (1 arc-minute, about
+1.85 km north–south and 1.48 km east–west at 37° N), spanning lon 133.8833–140.8000,
+lat 34.7500–40.1333. That contains the brief's bbox with a wide margin; 1,271
+nodes fall inside it, so many buildings will share a node. Inside the box: MMI
+6.3–8.8, PGA 18.29–166.9 %g, PGV 14.2–120.3 cm/s, PSA03 36.23–275.6 %g,
+PSA10 12.98–166.8 %g, PSA30 4.201–83.27 %g. No zero or negative values in the box.
+
+**Units differ between files of the same product.** Measured, not assumed:
+
+| Field | `grid.xml` header | `grid.xml` max | `info.json` | `shape.zip` contour values |
+| --- | --- | --- | --- | --- |
+| MMI | `intensity` | 8.8 | intensity, 8.802 | 2.6–8.8 |
+| PGA | `%g` | 166.9 | `g`, 1.669 | 0.01–1.66 (g) |
+| PGV | `cm/s` | 120.3 | `cms`, 120.336 | 1–120 |
+| PSA03 / 10 / 30 | `%g` | 275.6 / 166.8 / 83.27 | `g`, 2.756 / 1.668 / 0.833 | g |
+
+Reading `grid.xml` and taking units from `info.json` would be off by a factor of
+100 on PGA and all three SA columns. The pipeline must take units from the file it
+reads values from.
+
+**"shape" is a ShakeMap product name.** USGS titles `shape.zip` "ShakeMap Shape
+Files". It holds contour polygons; the dbf fields are `AREA, PERIMETER, PGAPOL_,
+PGAPOL_ID, GRID_CODE, PARAMVALUE`, and `mi.shp` has 32 polygons at MMI 2.6–8.8 in
+steps of exactly 0.2, in WGS 84. No ShakeMap field, product or documented concept
+is called `MMI_shape`.
+
+**Licence.** `https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits`:
+"USGS-authored or produced data and information are considered to be in the U.S.
+Public Domain." Suggested credit: "U.S. Geological Survey". J-SHIS and JMA/NIED
+grids were not investigated because the USGS product exists.
+
+### A.4 `MMI_original` and `MMI_shape`: a hypothesis, not a definition
+
+The evidence points to one reading, but nothing documents it:
+
+- `MMI_original`: continuous MMI from the ShakeMap grid, or the dataset's own
+  `USGS_MMI`.
+- `MMI_shape`: MMI read off the `shape.zip` contour band containing the building.
+  The 0.2 steps of the dataset's `USGS_MMI` match the 0.2 contour interval of
+  `mi.shp` exactly.
+
+Against it: `USGS_MMI` reaches 9.0, while version 10's contours and grid both stop
+at 8.8 (`max_grid` 8.802). The value 9.0 cannot be produced from the ShakeMap
+version available today. Either an earlier ShakeMap version was used, or bands
+were labelled by their upper edge. Neither the paper nor the Zenodo record
+documents the method. **`MMI_shape` therefore remains undefined**, as section 4.2
+item 6 already said, and it still blocks E_S's monotonicity constraint.
+
+### A.5 Confirmed versus uncertain
+
+Confirmed:
+
+- GSI has no per-building damage product for this event; its products are area
+  polygons and imagery.
+- The per-building labels and footprints come from the Tohoku ESSD/Zenodo
+  dataset, CC-BY-4.0, GeoPackage, EPSG:4326, MultiPolygon, 140,208 buildings,
+  codes 0/1/9/99 with published meanings.
+- USGS ShakeMap version 10 exists for `us6000m0xl`, covers the whole box at 1
+  arc-minute, and carries MMI, PGA, PGV, PSA03, PSA10 and PSA30. Public domain.
+- Units differ between `grid.xml` (%g) and `info.json` / `shape.zip` (g).
+
+Uncertain:
+
+- The meaning of `MMI_shape` (A.4).
+- Which ShakeMap version produced the dataset's `USGS_MMI`. Version 10 maxes out
+  below its values.
+- How the old pipeline got from 140,208 (or 136,728 in the box) to 128,843.
+- The sampling rule for building → ShakeMap value: footprint centroid, nearest
+  node, or bilinear. This is a design choice for Phase 1, not a source fact.
+
+### A.6 Recommendation
+
+**Phase 1 can be designed around two sources, but not the two the plan named,
+and three points need the user first.**
+
+The sources are the Tohoku damage dataset (Zenodo `10.5281/zenodo.11055711`,
+v2.5) for footprints and labels, and USGS ShakeMap `us6000m0xl` v10 for shaking.
+The GSI aerial-interpretation product cannot be one of the two because it does not
+exist. GSI stays involved through the footprints and the imagery tiles.
+
+The user needs to:
+
+1. **Approve the substitution.** The label source becomes a CC-BY-4.0 academic
+   dataset, not a GSI product. That adds a mandatory citation and attribution row
+   to `DATASET.md`. The input is a GeoPackage, so Phase 1 needs a vector reader in
+   place of `datasets.load_dataset` (open question 2 in section 8).
+2. **Define `MMI_shape`**, or accept the A.4 reading in writing. The Fixed-inputs
+   table asks for seven seismic columns, and six of them do not exist in any
+   source until this project samples them from ShakeMap. How they are sampled is
+   the user's call.
+3. **Accept that the old class counts cannot be reproduced** and stay a comparison
+   column under ruling R10.
+
+The evidence also **unblocks the code-99 decision in section 7.1**. The ESSD
+paper is a named source that states the meanings of 9 and 99 in quotable words,
+which D4 requires (spec line 237) and Phase 0 could not previously find. Code 99
+marks a footprint that did not match pre-event imagery and was replaced. It is a
+data-quality flag, not an observation of the building, so the building has no
+collapse label. That is the same mapping the `unknown` default gives, now with a
+source. The branch should be put back to the user at Stop 1 with the quote in A.2.2
+attached.
