@@ -10,6 +10,7 @@ between data and sidecar leaves a file that no run will trust.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 from collections.abc import Callable, Iterable
@@ -18,13 +19,15 @@ from pathlib import Path
 import pandas as pd
 import pyarrow as pa
 
-from notodata import chips, config, paths
+from notodata import chips, config, paths, tiles
 from notodata.config import CONFIG
 from notodata.io import atomic_write, sha256_bytes, write_parquet_deterministic
 
 log = logging.getLogger(__name__)
 
 CHIPS_SOURCE = Path(chips.__file__)
+GUARDED_SOURCES = (CHIPS_SOURCE, Path(tiles.__file__))
+"""Files whose maths defines a chip: a change to either needs a version bump."""
 LOCK_PATH = Path(__file__).with_name("pipeline_version.json")
 """Records the `PIPELINE_VERSION` and the `chips.py` hash that go with it."""
 
@@ -69,6 +72,9 @@ def expected_meta(
     }
 
 
+_ABSENT = object()
+
+
 def _differing_keys(found: dict, expected: dict) -> list[str]:
     return [
         k
@@ -77,7 +83,24 @@ def _differing_keys(found: dict, expected: dict) -> list[str]:
     ]
 
 
-_ABSENT = object()
+def _invalid_reason(path: Path, side: Path, expected: dict) -> str | None:
+    """Why `path` cannot be trusted, or None if its sidecar matches `expected`."""
+    if not path.exists():
+        return "data file missing"
+    if not side.exists():
+        return "sidecar missing"
+    try:
+        found = json.loads(side.read_text())
+        if not isinstance(found, dict):
+            raise ValueError("sidecar is not an object")
+    except (OSError, ValueError):
+        return "sidecar unreadable"
+    diff = _differing_keys(found, expected)
+    if not diff:
+        return None
+    return "keys differ: " + "; ".join(
+        f"{k}: {found.get(k, '<absent>')!r} -> {expected.get(k, '<absent>')!r}" for k in diff
+    )
 
 
 def ensure(path: Path | str, expected: dict, compute: Callable[[Path], None]) -> bool:
@@ -91,26 +114,9 @@ def ensure(path: Path | str, expected: dict, compute: Callable[[Path], None]) ->
     side = sidecar_path(path)
     # round-trip through JSON so tuples/lists compare the way they are stored
     expected = json.loads(json.dumps(expected))
-    reason = None
-    if not path.exists():
-        reason = "data file missing"
-    elif not side.exists():
-        reason = "sidecar missing"
-    else:
-        try:
-            found = json.loads(side.read_text())
-            if not isinstance(found, dict):
-                raise ValueError("sidecar is not an object")
-        except (OSError, ValueError):
-            reason = "sidecar unreadable"
-        else:
-            diff = _differing_keys(found, expected)
-            if not diff:
-                return False
-            reason = "keys differ: " + "; ".join(
-                f"{k}: {found.get(k, '<absent>')!r} -> {expected.get(k, '<absent>')!r}"
-                for k in diff
-            )
+    reason = _invalid_reason(path, side, expected)
+    if reason is None:
+        return False
     log.info("recompute %s (%s)", path, reason)
     side.unlink(missing_ok=True)
     compute(path)
@@ -140,33 +146,62 @@ def ensure_chip_index(
 # -- version guard ---------------------------------------------------------
 
 
-def chips_source_sha256(source_path: Path = CHIPS_SOURCE) -> str:
-    return sha256_bytes(Path(source_path).read_bytes())
+class PipelineVersionError(RuntimeError):
+    """The hashed sources changed but `PIPELINE_VERSION` was not bumped."""
 
 
-def update_pipeline_lock(lock_path: Path = LOCK_PATH, source_path: Path = CHIPS_SOURCE) -> None:
-    """Record the current `PIPELINE_VERSION` and `chips.py` hash (run after a version bump)."""
-    record = {
-        "pipeline_version": config.PIPELINE_VERSION,
-        "chips_py_sha256": chips_source_sha256(source_path),
-    }
+def sources_sha256(source_paths: tuple[Path, ...] = GUARDED_SOURCES) -> str:
+    """One hash over the guarded files' names and bytes, in the given order."""
+    digest = hashlib.sha256()
+    for p in source_paths:
+        digest.update(Path(p).name.encode() + b"\0" + Path(p).read_bytes() + b"\0")
+    return digest.hexdigest()
+
+
+def _read_lock(lock_path: Path) -> dict | None:
+    try:
+        record = json.loads(Path(lock_path).read_text())
+    except (OSError, ValueError):
+        return None
+    return record if isinstance(record, dict) else None
+
+
+def update_pipeline_lock(
+    lock_path: Path = LOCK_PATH, source_paths: tuple[Path, ...] = GUARDED_SOURCES
+) -> None:
+    """Record the current `PIPELINE_VERSION` and source hash (run after a version bump).
+
+    Refuses when the sources changed but `PIPELINE_VERSION` equals the recorded one.
+    """
+    digest = sources_sha256(source_paths)
+    old = _read_lock(lock_path)
+    if (
+        old is not None
+        and "sources_sha256" in old
+        and old["sources_sha256"] != digest
+        and old.get("pipeline_version") == config.PIPELINE_VERSION
+    ):
+        raise PipelineVersionError(
+            f"guarded sources changed but PIPELINE_VERSION is still {config.PIPELINE_VERSION}; "
+            "bump it in config.py first"
+        )
+    record = {"pipeline_version": config.PIPELINE_VERSION, "sources_sha256": digest}
     atomic_write(lock_path, (json.dumps(record, indent=2) + "\n").encode())
 
 
 def pipeline_guard_problem(
-    lock_path: Path = LOCK_PATH, source_path: Path = CHIPS_SOURCE
+    lock_path: Path = LOCK_PATH, source_paths: tuple[Path, ...] = GUARDED_SOURCES
 ) -> str | None:
-    """None if `chips.py` and `PIPELINE_VERSION` match the record, else what to do."""
+    """None if the guarded sources and `PIPELINE_VERSION` match the record, else what to do."""
     fix = (
         "bump PIPELINE_VERSION in config.py if the maths changed, "
         "then run scripts/update_pipeline_hash.py"
     )
-    try:
-        record = json.loads(Path(lock_path).read_text())
-    except (OSError, ValueError):
+    record = _read_lock(lock_path)
+    if record is None:
         return f"{lock_path} missing or unreadable; run scripts/update_pipeline_hash.py"
     if record.get("pipeline_version") != config.PIPELINE_VERSION:
         return f"PIPELINE_VERSION changed without a recorded hash: {fix}"
-    if record.get("chips_py_sha256") != chips_source_sha256(source_path):
-        return f"chips.py changed but PIPELINE_VERSION did not: {fix}"
+    if record.get("sources_sha256") != sources_sha256(source_paths):
+        return f"chips.py or tiles.py changed but PIPELINE_VERSION did not: {fix}"
     return None

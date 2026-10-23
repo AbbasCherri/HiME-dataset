@@ -22,6 +22,7 @@ Filled once the pipeline has run.
 | 8 | GSI request limits | not fixed by the brief | 8 concurrent requests, a 10 requests/second token bucket, 5 retries with exponential backoff (429/503 back off from 5 s doubling, capped at 60 s; 1 s base otherwise; an empty 200 body counts as a retryable failure), 404 cached as a negative entry | Polite load against a public tile server; about 12 hours for 400,000 requests | 2026-10-23 |
 | 9 | Candidate embedding encoders | not fixed by the brief | `resnet50.tv_in1k_v2` (2048-d), `dinov2_vits14` (384-d), `openclip_vitb32_laion2b` (512-d), `satlas_aerial_swinb_si` (aerial-pretrained); chips resized to 224 px, bicubic | Two general encoders, one language-aligned, one trained on aerial imagery; which one is used downstream is chosen later, on validation data | 2026-10-23 |
 | 10 | Cognitive-complexity gate | not fixed by the brief | `complexipy --max-complexity-allowed 10` | A function above the threshold is refactored into smaller pieces, never exempted | 2026-10-23 |
+| 11 | Cache sidecar key `building_ids_sha256` | the brief's sidecar keys: `chip_pipeline_version`, `layer_ids`, `zoom`, `chip_size`, `encoder_id`, `row_count` | the same keys plus `building_ids_sha256` (SHA-256 of the sorted building id list) | The same row count with different buildings must also force a recompute | 2026-10-23 |
 
 ## 3. Sources
 

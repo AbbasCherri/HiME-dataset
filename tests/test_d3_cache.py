@@ -134,29 +134,51 @@ def test_pipeline_version_guard():
     assert cache.pipeline_guard_problem() is None
 
 
-def test_guard_detects_change_and_update_helper_fixes_it(tmp_path):
+def _guard_fixture(tmp_path):
     lock = tmp_path / "pipeline_version.json"
-    src = tmp_path / "chips.py"
-    src.write_text("a = 1\n")
-    cache.update_pipeline_lock(lock_path=lock, source_path=src)
-    assert cache.pipeline_guard_problem(lock_path=lock, source_path=src) is None
-    src.write_text("a = 2\n")
-    assert "PIPELINE_VERSION" in cache.pipeline_guard_problem(lock_path=lock, source_path=src)
-    cache.update_pipeline_lock(lock_path=lock, source_path=src)
-    assert cache.pipeline_guard_problem(lock_path=lock, source_path=src) is None
+    srcs = (tmp_path / "chips.py", tmp_path / "tiles.py")
+    for src in srcs:
+        src.write_text("a = 1\n")
+    cache.update_pipeline_lock(lock_path=lock, source_paths=srcs)
+    return lock, srcs
 
 
-def test_update_script_runs_and_is_a_noop_when_current():
+@pytest.mark.parametrize("which", [0, 1])
+def test_guard_trips_on_either_source(tmp_path, which):
+    lock, srcs = _guard_fixture(tmp_path)
+    assert cache.pipeline_guard_problem(lock_path=lock, source_paths=srcs) is None
+    srcs[which].write_text("a = 2\n")
+    assert "PIPELINE_VERSION" in cache.pipeline_guard_problem(lock_path=lock, source_paths=srcs)
+
+
+def test_guarded_sources_include_tiles():
+    assert {p.name for p in cache.GUARDED_SOURCES} == {"chips.py", "tiles.py"}
+
+
+def test_update_refuses_without_version_bump_then_succeeds_after(tmp_path, monkeypatch):
+    lock, srcs = _guard_fixture(tmp_path)
+    srcs[1].write_text("a = 2\n")
+    with pytest.raises(cache.PipelineVersionError):
+        cache.update_pipeline_lock(lock_path=lock, source_paths=srcs)
+    assert cache.pipeline_guard_problem(lock_path=lock, source_paths=srcs) is not None
+    monkeypatch.setattr(config, "PIPELINE_VERSION", config.PIPELINE_VERSION + 1)
+    cache.update_pipeline_lock(lock_path=lock, source_paths=srcs)
+    assert cache.pipeline_guard_problem(lock_path=lock, source_paths=srcs) is None
+
+
+def test_update_script_writes_given_lock_and_leaves_tracked_lock(tmp_path):
     root = repo_root()
-    before = cache.LOCK_PATH.read_bytes()
+    tracked = cache.LOCK_PATH.read_bytes()
+    lock = tmp_path / "lock.json"
     out = subprocess.run(
-        [sys.executable, str(root / "scripts" / "update_pipeline_hash.py")],
+        [sys.executable, str(root / "scripts" / "update_pipeline_hash.py"), str(lock)],
         capture_output=True,
         text=True,
         check=True,
     )
     assert out.returncode == 0
-    assert cache.LOCK_PATH.read_bytes() == before
+    assert json.loads(lock.read_text()) == json.loads(tracked)
+    assert cache.LOCK_PATH.read_bytes() == tracked
 
 
 def test_chip_index_written_with_sidecar(tmp_home):
