@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 #
 # Toolchain image for the notodata pipeline. Every command in this repo runs in it
-# (through scripts/dc), so the host never needs Python or uv.
+# (through `docker compose`), so the host never needs Python or uv.
 #
 # Pins (also recorded in DATASET.md):
 #   python:3.12-slim-bookworm  sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70
@@ -11,6 +11,11 @@ FROM ghcr.io/astral-sh/uv:0.13.5 AS uv
 FROM python:3.12-slim-bookworm@sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70
 
 COPY --from=uv /uv /uvx /usr/local/bin/
+
+# git backs the repo-hygiene tests' authoritative `git ls-files` path.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
 
 ARG UID=1000
 ARG GID=1000

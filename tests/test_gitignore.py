@@ -20,3 +20,10 @@ def test_dockerignore_excludes_the_same_paths():
     lowered = text.lower()
     assert "audit" in lowered
     assert "key" in lowered
+
+
+def test_dockerignore_excludes_agent_tooling_dir():
+    # The plan's Docker-runtime section names .git, .env, .superpowers/ and
+    # data/ as the build-context exclude set.
+    text = (repo_root() / ".dockerignore").read_text()
+    assert ".superpowers/" in text

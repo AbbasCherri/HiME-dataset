@@ -11,6 +11,10 @@ _CONTENT_SCAN_EXCLUDE = {
     # These files necessarily name the patterns/paths they search for or skip.
     "tests/test_no_agent_artifacts.py",
     "tests/_fsscan.py",
+    # These reference the `.superpowers/` directory only to exclude it from
+    # the Docker build context / assert that exclusion -- not as a mention.
+    ".dockerignore",
+    "tests/test_gitignore.py",
 }
 
 

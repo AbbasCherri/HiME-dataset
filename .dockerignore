@@ -2,6 +2,7 @@
 .git
 .env
 docs/
+.superpowers/
 data/
 .venv/
 __pycache__/

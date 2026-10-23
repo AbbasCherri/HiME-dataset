@@ -1,10 +1,14 @@
 """Shared helpers for repo-hygiene tests (gitignore, token and agent-artifact scans).
 
-`git ls-files` is the authoritative tracked-file list, but a git worktree
-whose `.git` file points at a gitdir outside the current bind mount can't
-resolve it from inside a container. These helpers fall back to a plain
-filesystem walk that excludes the directories and files this repo's own
-`.gitignore` always excludes, so the scans still work in that case.
+`git ls-files` is the authoritative tracked-file list, and the toolchain
+image installs `git` so that path is tried first. It still can't resolve
+from inside a container for a linked worktree whose `.git` file points at a
+gitdir on the host outside the bind mount (`fatal: not a git repository:
+<host path>`) -- which is exactly this repository's situation: the mounted
+directory is a `git worktree` of a repo that lives elsewhere on the host,
+and only the worktree itself is mounted in. These helpers fall back to a
+plain filesystem walk that excludes the directories and files this repo's
+own `.gitignore`/`.dockerignore` always excludes, so the scans still work.
 """
 
 from __future__ import annotations
