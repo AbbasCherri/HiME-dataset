@@ -60,12 +60,58 @@ def test_medoid_is_deterministic_minimiser():
     )
 
 
+def _sample(ids, seed_or_rng):
+    """The `medoid_sample_max` ids a fresh/given rng draws from the sorted ids."""
+    rng = np.random.default_rng(seed_or_rng) if isinstance(seed_or_rng, int) else seed_or_rng
+    ids = np.sort(ids)
+    return set(ids[rng.choice(len(ids), CONFIG.clients.medoid_sample_max, replace=False)])
+
+
+def _big_cluster(seed, n=CONFIG.clients.medoid_sample_max + 100):
+    g = np.random.default_rng(seed)
+    ids = g.permutation(np.arange(n) * 3 + 7)
+    return ids, g.normal(size=(n, 2))
+
+
+def _brute_medoid(ids, xy, sample):
+    keep = np.array([i in sample for i in ids])
+    sid, sxy = ids[keep], xy[keep]
+    d = np.linalg.norm(sxy[:, None] - sxy[None], axis=2).sum(axis=1)
+    return int(sid[np.lexsort((sid, d))[0]])
+
+
 def test_medoid_sampling_caps_cluster():
-    rng = np.random.default_rng(0)
-    ids = np.arange(CONFIG.clients.medoid_sample_max + 50)
-    xy = np.column_stack([ids.astype(float), np.zeros(len(ids))])
-    m = clients.medoid(ids, xy, rng)
-    assert m in ids
+    ids, xy = _big_cluster(1)
+    m = clients.medoid(ids, xy, np.random.default_rng(0))
+    assert m == clients.medoid(ids, xy, np.random.default_rng(0))
+    sample = _sample(ids, 0)
+    assert len(sample) == CONFIG.clients.medoid_sample_max
+    assert m in sample
+    assert m == _brute_medoid(ids, xy, sample)
+    perm = np.random.default_rng(5).permutation(len(ids))
+    assert clients.medoid(ids[perm], xy[perm], np.random.default_rng(0)) == m
+
+
+def test_medoids_one_rng_walks_labels_ascending():
+    n = CONFIG.clients.medoid_sample_max + 100
+    ids0, xy0 = _big_cluster(1, n)
+    ids1, xy1 = _big_cluster(2, n)
+    pool = pd.DataFrame(
+        {
+            "building_id": np.concatenate([ids0, ids1 + 1_000_000]),
+            "x_m": np.concatenate([xy0[:, 0], xy1[:, 0]]),
+            "y_m": np.concatenate([xy0[:, 1], xy1[:, 1]]),
+        }
+    )
+    labels = np.repeat([0, 1], n)
+    got = clients._medoids(pool, labels, 2, 7)
+    rng = np.random.default_rng(7)
+    s0 = _sample(ids0, rng)
+    s1 = _sample(ids1 + 1_000_000, rng)
+    assert got[0] == _brute_medoid(ids0, xy0, s0)
+    assert got[1] == _brute_medoid(ids1 + 1_000_000, xy1, s1)
+    # cluster 1's sample depends on cluster 0's draw: it is not a fresh-rng sample
+    assert s1 != _sample(ids1 + 1_000_000, 7)
 
 
 def test_clients_hold_no_heldout(built, split):
@@ -92,19 +138,31 @@ def test_min_client_size(built, df, split):
     assert (sizes >= CONFIG.clients.min_client_size).all()
     assert (meta.set_index("client_id")["n_buildings"] == sizes).all()
     dropped = assign[assign.role == "client_dropped"]
+    assert len(dropped) > 0
+    assert len(sizes) > 0
     assert (dropped["client_id"] == -1).all()
 
 
-def test_dropped_recorded(df, split):
-    # Force many tiny clusters so some get dropped.
-    assign, _ = clients.build_clients(df, split, 400, SEED)
-    summ = clients.summary_row(assign, df, 400, SEED)
+def test_dropped_recorded(built, df, split):
+    assign, meta = built
+    s = clients.summary_row(assign, df, N, SEED)
     dropped = assign[assign.role == "client_dropped"]
-    assert summ["buildings_dropped"] == len(dropped)
-    assert summ["clients_dropped"] >= 0
-    assert summ["dropped_collapsed"] + summ["dropped_survived"] + summ["dropped_unlabelled"] == len(
-        dropped
-    )
+    kept = assign[assign.client_id >= 0]
+    assert s["clients_dropped"] > 0
+    assert s["clients_kept"] > 0
+    assert s["buildings_dropped"] > 0
+    assert s["clients_kept"] + s["clients_dropped"] == N
+    assert len(meta) == s["clients_kept"]
+    assert s["buildings_dropped"] == len(dropped)
+    assert (dropped["client_id"] == -1).all()
+    assert set(kept["role"]) <= {"train", "calib", "unlabelled"}
+    assert -1 not in set(meta["client_id"])
+    pool = (split["role"] == "train_pool").sum()
+    assert s["buildings_dropped"] + len(kept) == pool
+    assert s["dropped_collapsed"] + s["dropped_survived"] + s["dropped_unlabelled"] == len(dropped)
+    assert s["size_min"] == meta["n_buildings"].min()
+    assert s["size_max"] == meta["n_buildings"].max()
+    assert s["size_median"] == meta["n_buildings"].median()
 
 
 def test_calib_share(built, df):
