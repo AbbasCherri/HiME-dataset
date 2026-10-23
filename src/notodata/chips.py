@@ -67,31 +67,34 @@ def _rgba(tile: np.ndarray) -> np.ndarray:
     return np.concatenate([tile, alpha], axis=2)
 
 
-def build_chip(fetcher: TileFetcher, layer_id: str, lat: float, lon: float) -> ChipResult:
-    """Cut the chip centred on (lat, lon); never resizes, never invents pixels."""
+def _window_origin(lat: float, lon: float) -> tuple[int, int]:
+    """Top-left global pixel of the window; checks the building sits at chip centre."""
     cfg = CONFIG.tile_chip
-    size, chip, z = cfg.tile_size_px, cfg.chip_size_px, cfg.zoom
-    gx, gy = global_pixel(lat, lon, z)
+    gx, gy = global_pixel(lat, lon, cfg.zoom)
     x0a, y0a = window_origin(gx, gy)
     x0, y0 = int(x0a), int(y0a)
-    half = chip // 2
+    half = cfg.chip_size_px // 2
     # the building lies at chip pixel (64, 64) to within one pixel
     if not (half <= gx - x0 < half + 1 and half <= gy - y0 < half + 1):
         raise RuntimeError(f"building not at chip centre: ({gx - x0}, {gy - y0})")
+    return x0, y0
 
-    tiles = tuple(covering_tiles(x0, y0))
+
+def _fetch_tiles(fetcher, layer_id, tiles):
+    """Tile pixels by `(tx, ty)`, or `None` when any fetch failed."""
     got: dict[tuple[int, int], np.ndarray | None] = {}
     failed = False
     for tx, ty in tiles:
         try:
-            got[tx, ty] = fetcher.get(layer_id, z, tx, ty)
+            got[tx, ty] = fetcher.get(layer_id, CONFIG.tile_chip.zoom, tx, ty)
         except TileFetchError:
             failed = True
-    if failed:
-        return ChipResult("error", None, tiles)
-    if any(t is None for t in got.values()):
-        return ChipResult("missing", None, tiles)
+    return None if failed else got
 
+
+def _crop_window(got, tiles, x0: int, y0: int) -> np.ndarray:
+    """Paste the tiles into a mosaic and crop the chip window as (h, w, 4)."""
+    size, chip = CONFIG.tile_chip.tile_size_px, CONFIG.tile_chip.chip_size_px
     tx_min, ty_min = min(t[0] for t in tiles), min(t[1] for t in tiles)
     nx = max(t[0] for t in tiles) - tx_min + 1
     ny = max(t[1] for t in tiles) - ty_min + 1
@@ -101,15 +104,28 @@ def build_chip(fetcher: TileFetcher, layer_id: str, lat: float, lon: float) -> C
             raise TileShapeError(f"tile is {tile.shape[1]}x{tile.shape[0]}, expected {size}x{size}")
         r, c = (ty - ty_min) * size, (tx - tx_min) * size
         mosaic[r : r + size, c : c + size] = _rgba(tile)
-
     cy, cx = y0 - ty_min * size, x0 - tx_min * size
-    window = mosaic[cy : cy + chip, cx : cx + chip]
+    return mosaic[cy : cy + chip, cx : cx + chip]
+
+
+def _classify(window: np.ndarray) -> tuple[str, np.ndarray]:
     rgb = np.ascontiguousarray(window[:, :, :3])
     if (window[:, :, 3] == 0).any():
-        return ChipResult("partial", rgb, tiles)
-    if _is_blank(rgb):
-        return ChipResult("blank", rgb, tiles)
-    return ChipResult("ok", rgb, tiles)
+        return "partial", rgb
+    return ("blank" if _is_blank(rgb) else "ok"), rgb
+
+
+def build_chip(fetcher: TileFetcher, layer_id: str, lat: float, lon: float) -> ChipResult:
+    """Cut the chip centred on (lat, lon); never resizes, never invents pixels."""
+    x0, y0 = _window_origin(lat, lon)
+    tiles = tuple(covering_tiles(x0, y0))
+    got = _fetch_tiles(fetcher, layer_id, tiles)
+    if got is None:
+        return ChipResult("error", None, tiles)
+    if any(t is None for t in got.values()):
+        return ChipResult("missing", None, tiles)
+    status, rgb = _classify(_crop_window(got, tiles, x0, y0))
+    return ChipResult(status, rgb, tiles)
 
 
 def write_chip(layer_id: str, building_id: int, result: ChipResult) -> Path:

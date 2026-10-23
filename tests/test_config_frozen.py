@@ -111,7 +111,7 @@ def test_d1_test_stub():
 
 
 def test_pipeline_version_and_code99_meaning():
-    assert config.PIPELINE_VERSION == 1
+    assert config.PIPELINE_VERSION == 2
     assert config.CODE99_MEANING == "missing_inconsistent"
 
 

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-PIPELINE_VERSION: int = 1
+PIPELINE_VERSION: int = 2
 """Bumped by hand whenever chip maths or another cache-defining step changes."""
 
 EARTH_RADIUS_M: float = 6_371_008.8
