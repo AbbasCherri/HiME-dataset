@@ -201,6 +201,8 @@ def ingest(
     root: Path | None = None,
 ) -> IngestResult:
     """Validate, unblind, write `reports/audit.csv` and `reports/audit/rater.json`."""
+    if not rater.strip() or not date.strip():
+        raise ValueError("rater and date are required (initials and sitting date)")
     key = pd.read_csv(key_path)
     marks = validate_marks(read_marks(marks_path), key)
     table = unblind(marks, key)

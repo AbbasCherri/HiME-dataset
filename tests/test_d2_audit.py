@@ -1,4 +1,5 @@
 import itertools
+import subprocess
 
 import numpy as np
 import pandas as pd
@@ -17,7 +18,7 @@ LAYERS = (BASE, POST, PRE)
 
 def _buildings(n=300):
     raw = np.array([1, 0, 99])[np.arange(n) % 3]
-    return pd.DataFrame({"building_id": np.arange(n) * 7 + 3, "label_raw": raw})
+    return pd.DataFrame({"building_id": np.arange(n) * 7 + 300_000_000_003, "label_raw": raw})
 
 
 def _all_ids(b):
@@ -67,11 +68,13 @@ def test_audit_blinding(tmp_home):
     b = _buildings()
     _write_chips(b)
     ids = _all_ids(b)
-    res = audit.export(b, post_layer=POST, pre_layer=PRE, post_ok=ids, seam_ok=ids, pre_ok=ids)
+    res = audit.export(
+        b, post_layer=POST, pre_layer=PRE, post_ok=ids, seam_ok=ids, pre_ok=ids, salt=b"\x07" * 32
+    )
     blind = paths.audit_dir() / "blind"
     files = sorted(p.name for p in blind.iterdir())
     assert len(files) == 120
-    key = pd.read_csv(res.key_path, dtype={"file": str})
+    key = pd.read_csv(res.key_path, dtype={"file": str, "salt": str})
     assert list(key.columns) == ["file", "building_id", "layer_id", "label_raw", "salt"]
     assert set(key["file"]) == set(files)
     assert len(key) == 120
@@ -80,6 +83,13 @@ def test_audit_blinding(tmp_home):
         assert len(stem) == 16
         assert int(stem, 16) >= 0
         assert not any(layer in name for layer in LAYERS)
+    # long ids so a substring hit cannot be chance; fixed salt keeps this deterministic
+    for name, bid in zip(key["file"], key["building_id"], strict=True):
+        assert str(bid) not in name
+        assert "collapsed" not in name
+        assert "survived" not in name
+    by_name = key.sort_values("file")["label_raw"].astype(int).tolist()
+    assert sum(x != y for x, y in itertools.pairwise(by_name)) > 10
     assert key.groupby("building_id").size().eq(3).all()
     assert key["building_id"].nunique() == 40
     # shuffled: layers interleave rather than forming blocks
@@ -210,3 +220,43 @@ def test_key_stays_uncommitted_until_unblinding(tmp_home):
     assert paths.audit_dir().name == "audit"
     assert "data/" in lines
     assert audit.KEY_NAME == "key.csv"
+
+
+def _ignored(rel: str) -> bool:
+    """`git check-ignore` when git can read the repo, else the .gitignore lines that matter."""
+    r = subprocess.run(
+        ["git", "check-ignore", "-q", rel], cwd=repo_root(), check=False, capture_output=True
+    )
+    if r.returncode in (0, 1):
+        return r.returncode == 0
+    lines = [x.strip() for x in (repo_root() / ".gitignore").read_text().splitlines()]
+    return any(x == rel or (x.endswith("/") and rel.startswith(x)) for x in lines)
+
+
+def test_exported_key_is_git_ignored(tmp_home, monkeypatch):
+    # the path a real run (NOTODATA_HOME=./data) writes the key to
+    monkeypatch.setenv("NOTODATA_HOME", "data")
+    rel = (paths.audit_dir() / audit.KEY_NAME).as_posix()
+    assert _ignored(rel), f"{rel} is not git-ignored"
+
+
+def test_ingest_never_writes_reports_key(tmp_home, tmp_path):
+    b = _buildings()
+    _write_chips(b)
+    ids = _all_ids(b)
+    res = audit.export(b, post_layer=POST, pre_layer=PRE, post_ok=ids, seam_ok=ids, pre_ok=ids)
+    key = pd.read_csv(res.key_path)
+    pd.DataFrame({"file": key["file"], "mark": "cannot_tell"}).to_csv(res.marks_path, index=False)
+    kw = {"seam_layer": BASE, "post_layer": POST, "pre_layer": PRE, "root": tmp_path}
+    audit.ingest(res.marks_path, res.key_path, rater="AC", date="2026-10-30", **kw)
+    assert not (tmp_path / "reports" / "audit" / "key.csv").exists()
+
+
+@pytest.mark.parametrize(
+    ("rater", "date"), [("", "2026-10-30"), ("  ", "2026-10-30"), ("AC", ""), ("AC", " \t")]
+)
+def test_ingest_requires_rater_and_date(tmp_path, rater, date):
+    kw = {"seam_layer": BASE, "post_layer": POST, "pre_layer": PRE, "root": tmp_path}
+    with pytest.raises(ValueError, match="rater and date"):
+        audit.ingest(tmp_path / "m.csv", tmp_path / "k.csv", rater=rater, date=date, **kw)
+    assert not (tmp_path / "reports").exists()
