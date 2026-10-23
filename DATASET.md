@@ -12,8 +12,8 @@ Filled once the pipeline has run.
 
 | # | Item | Brief value | Used value | Reason | Date |
 | --- | --- | --- | --- | --- | --- |
-| 1 | HF dataset | `AbbasABC/HFL-Dataset` | `AbbasABC/HiME-dataset` | The source dataset changed; the old id belongs to a different repository | 2026-10-23 |
-| 2 | HF revision | `6cf97c900445e080e61cb45e1aa72515d3ff1de8` | `PENDING-TASK-2` | That pin belonged to the old repository; the new revision is resolved once the new dataset is inspected, and this literal placeholder is used until then | 2026-10-23 |
+| 1 | Raw source | `AbbasABC/HFL-Dataset` | Zenodo `10.5281/zenodo.11055711` (`Noto_Peninsula_Damage_2_5.gpkg`, MD5 `280e9c53cb45086786c20ed0b2c21ffb`) plus USGS ShakeMap `us6000m0xl` v10 | The HF dataset was unusable as a raw source; per-building labels come from the published ESSD dataset and the seismic columns are sampled from the ShakeMap grid | 2026-10-23 |
+| 2 | Code 99 meaning | `unknown` until a named source | `missing_inconsistent` | Vescovo et al. 2025 section 2.2: 99 = "missing or inconsistent" footprint | 2026-10-23 |
 | 3 | Earth radius | not fixed by the brief | 6371008.8 m (IUGG mean) | Any standard radius changes distances by under 0.2% | 2026-10-23 |
 | 4 | Client counts | not fixed by the brief | N = 50, 100 and 200 | About 1,200, 600 and 300 training buildings per client; 600 is the planning figure used downstream | 2026-10-23 |
 | 5 | Seed ranges | not fixed by the brief | Development 1000-1004, tuning 2000-2004, confirmation 3000-3019, replication 4000-4019 | Four disjoint ranges are needed; 20 seeds in confirmation and replication give enough margin for a Holm correction over 3 client counts | 2026-10-23 |
@@ -25,8 +25,9 @@ Filled once the pipeline has run.
 
 ## 3. Sources
 
-- HF dataset `AbbasABC/HiME-dataset` @ `PENDING-TASK-2` (pin resolved once the
-  dataset is inspected)
+- Zenodo `10.5281/zenodo.11055711`, v2.5, `Noto_Peninsula_Damage_2_5.gpkg`
+  (CC-BY-4.0; Vescovo et al. 2025, doi:10.5194/essd-17-5259-2025)
+- USGS ShakeMap `us6000m0xl`, version 10 (US Public Domain)
   <!-- AUTO:source_files --> file, size, sha256 <!-- /AUTO -->
 - Dataset card and every source it cites (URL, date accessed)
 - GSI Noto page, GSI tile list, GSI content-use terms

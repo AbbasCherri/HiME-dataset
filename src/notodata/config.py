@@ -13,20 +13,35 @@ from dataclasses import dataclass
 PIPELINE_VERSION: int = 1
 """Bumped by hand whenever chip maths or another cache-defining step changes."""
 
-CODE99_MEANING: str = "unknown"
+CODE99_MEANING: str = "missing_inconsistent"
 """One of `no_longer_present`, `missing_inconsistent` or `unknown`.
 
-Default `unknown` until a named source (the dataset card, or a document it
-cites, quoted in DATASET.md) states the meaning of raw label code 99 in
-words that can be quoted. A code comment, a column name or the old
-repository do not count as that source.
+Sourced from Vescovo et al. 2025 (ESSD 17, 5259-5276), section 2.2: code 9 is
+"obstructed view through human inspection" and code 99 is a "missing or
+inconsistent" footprint. Quoted in DATASET.md and notes/phase0.md.
 """
 
 
 @dataclass(frozen=True)
-class HFSource:
-    dataset_id: str
-    revision: str
+class BuildingSource:
+    """Per-building labels and footprints: the Zenodo ESSD GeoPackage."""
+
+    concept_doi: str
+    paper_doi: str
+    filename: str
+    md5: str
+    licence: str
+
+
+@dataclass(frozen=True)
+class ShakeMapSource:
+    """Seismic columns: sampled from a version-pinned USGS ShakeMap grid."""
+
+    event_id: str
+    version: int
+    base_url: str
+    grid_file: str
+    licence: str
 
 
 @dataclass(frozen=True)
@@ -107,7 +122,8 @@ class D1TestStub:
 
 @dataclass(frozen=True)
 class Config:
-    hf_source: HFSource
+    buildings: BuildingSource
+    shakemap: ShakeMapSource
     bounding_box: BoundingBox
     seismic_columns: tuple[str, ...]
     label_column: str
@@ -125,15 +141,19 @@ class Config:
 
 
 CONFIG = Config(
-    hf_source=HFSource(
-        # Overridden: the brief's original pin (`AbbasABC/HFL-Dataset` @
-        # 6cf97c900445e080e61cb45e1aa72515d3ff1de8) belongs to a different
-        # repository. The new revision is resolved once the dataset is
-        # inspected; "PENDING-TASK-2" is a literal placeholder, logged in
-        # DATASET.md's Deviations table, and is never used to fetch anything
-        # before it is replaced with the real pin.
-        dataset_id="AbbasABC/HiME-dataset",
-        revision="PENDING-TASK-2",
+    buildings=BuildingSource(
+        concept_doi="10.5281/zenodo.11055711",
+        paper_doi="10.5194/essd-17-5259-2025",
+        filename="Noto_Peninsula_Damage_2_5.gpkg",
+        md5="280e9c53cb45086786c20ed0b2c21ffb",
+        licence="CC-BY-4.0",
+    ),
+    shakemap=ShakeMapSource(
+        event_id="us6000m0xl",
+        version=10,
+        base_url="https://earthquake.usgs.gov/product/shakemap/us6000m0xl/us/1710009202676",
+        grid_file="grid.xml",
+        licence="US Public Domain",
     ),
     bounding_box=BoundingBox(
         lat_min=37.005,

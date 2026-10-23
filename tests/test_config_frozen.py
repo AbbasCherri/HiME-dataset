@@ -5,9 +5,18 @@ import pytest
 from notodata import config
 
 
-def test_hf_source_is_overridden_to_the_new_dataset():
-    assert config.CONFIG.hf_source.dataset_id == "AbbasABC/HiME-dataset"
-    assert config.CONFIG.hf_source.revision == "PENDING-TASK-2"
+def test_building_source():
+    b = config.CONFIG.buildings
+    assert b.concept_doi == "10.5281/zenodo.11055711"
+    assert b.filename == "Noto_Peninsula_Damage_2_5.gpkg"
+    assert b.md5 == "280e9c53cb45086786c20ed0b2c21ffb"
+    assert b.licence == "CC-BY-4.0"
+
+
+def test_shakemap_source():
+    m = config.CONFIG.shakemap
+    assert (m.event_id, m.version) == ("us6000m0xl", 10)
+    assert m.base_url.endswith("/us6000m0xl/us/1710009202676")
 
 
 def test_bounding_box():
@@ -103,14 +112,14 @@ def test_d1_test_stub():
 
 def test_pipeline_version_and_code99_meaning():
     assert config.PIPELINE_VERSION == 1
-    assert config.CODE99_MEANING == "unknown"
+    assert config.CODE99_MEANING == "missing_inconsistent"
 
 
 @pytest.mark.parametrize(
     ("get_instance", "field_name"),
     [
         (lambda: config.CONFIG, "coverage_threshold"),
-        (lambda: config.CONFIG.hf_source, "dataset_id"),
+        (lambda: config.CONFIG.buildings, "md5"),
         (lambda: config.CONFIG.bounding_box, "lat_min"),
         (lambda: config.CONFIG.moran, "threshold"),
         (lambda: config.CONFIG.clients, "min_client_size"),

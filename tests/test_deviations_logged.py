@@ -9,8 +9,9 @@ from notodata import config
 # Numbers the brief leaves open, decided by this project and logged here
 # before first use (plus the dataset-source change).
 _REQUIRED_SNIPPETS = [
-    config.CONFIG.hf_source.dataset_id,  # "AbbasABC/HiME-dataset"
-    config.CONFIG.hf_source.revision,  # "PENDING-TASK-2"
+    config.CONFIG.buildings.concept_doi,
+    config.CONFIG.buildings.md5,
+    config.CONFIG.shakemap.event_id,
     "AbbasABC/HFL-Dataset",  # the old, overridden dataset id
     "6371008.8",  # Earth radius, IUGG mean, in metres
     "50",
@@ -38,8 +39,3 @@ def test_deviations_table_logs_every_non_brief_number():
     missing = [snippet for snippet in _REQUIRED_SNIPPETS if snippet not in text]
     assert not missing, f"DATASET.md is missing: {missing}"
 
-
-def test_deviations_table_accepts_the_pending_revision_literal():
-    # Ruling: the revision is resolved once the dataset is inspected; until
-    # then this literal placeholder is what config.py and DATASET.md agree on.
-    assert config.CONFIG.hf_source.revision == "PENDING-TASK-2"
