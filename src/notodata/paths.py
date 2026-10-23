@@ -79,3 +79,7 @@ def client_meta_path(n: int, seed: int) -> Path:
 def reports_dir(root: Path | None = None) -> Path:
     """Reports are committed, so they live at the repo root, not under NOTODATA_HOME."""
     return (root or Path()) / "reports"
+
+
+def chip_index_path(layer_id: str) -> Path:
+    return chips_dir(layer_id) / "index.parquet"
