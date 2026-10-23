@@ -63,17 +63,23 @@ def test_best_pre_ties_most_recent_year():
     )
 
 
-@pytest.mark.parametrize("n_seam", [9, 10, 11])
-@pytest.mark.parametrize("delta", [-1, 0, 1])
-def test_decision_rule(n_seam, delta):
-    n_post = n_seam + delta
-    row = coverage.rule_row(n_seam, n_post)
-    if n_seam < 10:
-        assert row == 3
-    elif n_post > n_seam:
-        assert row == 1
-    else:
-        assert row == 2
+@pytest.mark.parametrize(
+    ("n_seam", "n_post", "row"),
+    [
+        (9, 8, 3),
+        (9, 9, 3),
+        (9, 10, 3),
+        (10, 9, 2),
+        (10, 10, 2),
+        (10, 11, 1),
+        (11, 12, 1),
+        (11, 11, 2),
+        (11, 10, 2),
+    ],
+)
+def test_decision_rule(n_seam, n_post, row):
+    assert CONFIG.audit.decision_threshold == 10
+    assert coverage.rule_row(n_seam, n_post) == row
 
 
 def test_chosen_layers_per_row():
@@ -121,9 +127,9 @@ def test_pre_coverage_on_remaining_buildings():
 def test_a1_rejection_needs_reaudit():
     ranked = ["nendophoto2022", "nendophoto2021"]
     with pytest.raises(coverage.NeedsReaudit) as e:
-        coverage.check_pre_layer(ranked[0], 3, ranked)
+        coverage.check_pre_layer(ranked[0], CONFIG.audit.pre_reject_damage, ranked)
     assert e.value.next_layer == "nendophoto2021"
-    coverage.check_pre_layer(ranked[0], 2, ranked)
+    coverage.check_pre_layer(ranked[0], CONFIG.audit.pre_reject_damage - 1, ranked)
     with pytest.raises(coverage.NeedsReaudit) as e:
         coverage.check_pre_layer(ranked[1], 5, ranked)
     assert e.value.next_layer is None
@@ -136,6 +142,7 @@ def test_decision_json_has_counts_and_rule_row(tmp_path):
         n_pre=1,
         best_post=SUZU2,
         a1_pre="nendophoto2022",
+        ranked_pre=["nendophoto2022", "nendophoto2021"],
         n_buildings=1000,
         n_kept=900,
         pre_available=True,
@@ -151,3 +158,28 @@ def test_decision_json_has_counts_and_rule_row(tmp_path):
     p = coverage.write_decision(d, root=tmp_path)
     assert json.loads(p.read_text())["rule_row"] == 1
     assert p.name == "imagery_decision.json"
+
+
+def test_build_decision_enforces_a1_rejection():
+    kw = {
+        "n_seam": 11, "n_post": 12, "best_post": SUZU2, "a1_pre": "nendophoto2022",
+        "ranked_pre": ["nendophoto2022", "nendophoto2021"], "n_buildings": 10,
+        "n_kept": 10, "pre_available": True, "post_coverage": 1.0, "pre_coverage": 1.0,
+    }  # fmt: skip
+    with pytest.raises(coverage.NeedsReaudit) as e:
+        coverage.build_decision(n_pre=CONFIG.audit.pre_reject_damage, **kw)
+    assert e.value.next_layer == "nendophoto2021"
+
+
+def test_unknown_a1_pre_and_empty_post_raise_explicitly():
+    with pytest.raises(ValueError, match="not among"):
+        coverage.check_pre_layer("nendophoto2030", 0, ["nendophoto2022"])
+    with pytest.raises(ValueError, match="at least one"):
+        coverage.best_post_layer({})
+
+
+def test_pre_boundary_799_of_1000():
+    b = pd.DataFrame({"building_id": range(1000), "label_raw": 0})
+    everything = set(range(1000))
+    assert coverage.apply_coverage_rules(b, everything, set(range(800))).pre_available
+    assert not coverage.apply_coverage_rules(b, everything, set(range(799))).pre_available

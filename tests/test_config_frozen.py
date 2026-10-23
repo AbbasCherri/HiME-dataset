@@ -70,7 +70,13 @@ def test_tile_and_chip_sizes():
 
 def test_audit_config():
     a = config.CONFIG.audit
-    assert (a.n_collapsed, a.n_survived, a.seed, a.decision_threshold) == (20, 20, 0, 10)
+    assert (a.n_collapsed, a.n_survived, a.seed, a.decision_threshold, a.pre_reject_damage) == (
+        20,
+        20,
+        0,
+        10,
+        3,
+    )
 
 
 def test_coverage_threshold():

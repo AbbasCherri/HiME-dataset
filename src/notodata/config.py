@@ -125,6 +125,8 @@ class AuditConfig:
     n_survived: int
     seed: int
     decision_threshold: int
+    pre_reject_damage: int
+    """Reject the A1 pre layer when this many audited collapsed buildings show damage in it."""
     """The "10 of 20" line in the decision rule."""
 
 
@@ -241,7 +243,9 @@ CONFIG = Config(
         precheck_zoom=14,
     ),
     blank_chip=BlankChipConfig(std_below=2.0, black_level=3, black_share=0.5),
-    audit=AuditConfig(n_collapsed=20, n_survived=20, seed=0, decision_threshold=10),
+    audit=AuditConfig(
+        n_collapsed=20, n_survived=20, seed=0, decision_threshold=10, pre_reject_damage=3
+    ),
     coverage_threshold=0.80,
     moran=MoranConfig(
         sample_size=20_000,

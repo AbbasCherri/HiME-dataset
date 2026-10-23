@@ -22,9 +22,6 @@ from notodata.layers import get_layer
 
 BASELINE = CONFIG.baseline_imagery.layer_id
 
-PRE_REJECT_DAMAGE = 3
-"""A1: reject the pre layer when this many of the 20 collapsed show damage in it."""
-
 COVERAGE_COLUMNS = ["layer_id", "group", "value", "n", *chips.STATUSES, "coverage"]
 
 
@@ -87,6 +84,8 @@ def _first_date_key(layer_id: str):
 
 def best_post_layer(n_ok: dict[str, int]) -> str:
     """Highest `ok` count; ties to the earliest capture date, then the lower `layer_id`."""
+    if not n_ok:
+        raise ValueError("best_post_layer needs at least one layer")
     top = max(n_ok.values())
     tied = [k for k, v in n_ok.items() if v == top]
     return min(tied, key=lambda k: (_first_date_key(k), k))
@@ -120,7 +119,9 @@ def choose_layers(row: int, best_post: str, a1_pre: str | None) -> tuple[str, st
 
 def check_pre_layer(a1_pre: str, n_pre: int, ranked: list[str]) -> None:
     """Raise `NeedsReaudit(next layer)` if `n_pre` collapsed buildings show damage in `a1_pre`."""
-    if n_pre >= PRE_REJECT_DAMAGE:
+    if a1_pre not in ranked:
+        raise ValueError(f"{a1_pre!r} is not among the ranked pre layers {ranked}")
+    if n_pre >= CONFIG.audit.pre_reject_damage:
         later = ranked[ranked.index(a1_pre) + 1 :]
         raise NeedsReaudit(later[0] if later else None)
 
@@ -181,6 +182,7 @@ def build_decision(
     n_pre: int,
     best_post: str,
     a1_pre: str | None,
+    ranked_pre: list[str],
     n_buildings: int,
     n_kept: int,
     pre_available: bool,
@@ -188,6 +190,8 @@ def build_decision(
     pre_coverage: float | None,
 ) -> dict:
     """The `imagery_decision.json` payload: every count, the rule row, layers and dates."""
+    if a1_pre is not None:
+        check_pre_layer(a1_pre, n_pre, ranked_pre)
     row = rule_row(n_seam, n_post)
     post, pre = choose_layers(row, best_post, a1_pre)
     return {
