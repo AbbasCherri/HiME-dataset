@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from conftest import FailingFetcher, StubFetcher
-from notodata import imagery, paths
+from notodata import chips, imagery, paths
 from notodata.config import CONFIG
 from notodata.tiles import covering_tiles, global_pixel, window_origin
 
@@ -29,11 +29,11 @@ def _tiles_of(row):
     return set(covering_tiles(int(x0), int(y0)))
 
 
-def _index(ids, ok):
+def _index(ids, ok, bad="missing"):
     rows = [
         (
             int(b),
-            "ok" if b in ok else "missing",
+            "ok" if b in ok else bad,
             f"chips/x/{b}.png" if b in ok else "",
             "h" if b in ok else "",
         )
@@ -150,3 +150,21 @@ def test_coverage_report(tmp_path):
     text = path.read_text()
     assert "chip_status" in text
     assert "missing" in text
+
+
+@pytest.mark.parametrize("status", [s for s in chips.STATUSES if s != "ok"])
+def test_non_ok_status_never_flags(status):
+    ids = [1, 2]
+    bad = _index(ids, set(), bad=status)
+    good = _index(ids, {1, 2})
+    for post, pre in ((bad, good), (good, bad)):
+        flags = imagery.flags_from_indexes(ids, post, pre, True)
+        col = "post" if post is bad else "pre"
+        assert (flags[f"has_{col}"] == 0).all()
+        assert (flags[f"{col}_chip"] == "").all()
+        assert (flags[f"{col}_chip_sha256"] == "").all()
+
+
+def test_pre_available_without_pre_layer_raises(tmp_home):
+    with pytest.raises(ValueError, match="pre layer"):
+        imagery.build_image_flags(StubFetcher(), _buildings(2), POST, None, True)

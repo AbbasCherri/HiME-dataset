@@ -86,8 +86,10 @@ def build_image_flags(
 ) -> pd.DataFrame:
     """Chip the post layer (and the pre layer if available) and derive the flags."""
     post_index = chips.build_chips(fetcher, post_layer, buildings)
+    if pre_available and pre_layer is None:
+        raise ValueError("pre_available is true but no pre layer was given")
     pre_index = None
-    if pre_available and pre_layer is not None:
+    if pre_available:
         pre_index = chips.build_chips(fetcher, pre_layer, buildings)
     flags = flags_from_indexes(buildings["building_id"], post_index, pre_index, pre_available)
     log.info("image patterns: %s", flags["G"].value_counts().to_dict())
@@ -101,6 +103,31 @@ def _value_label(v) -> str:
     return str(int(f)) if f.is_integer() else str(f)
 
 
+def _pattern_rows(group: str, value: str, sub: pd.DataFrame) -> list[tuple]:
+    n = len(sub)
+    rows = []
+    for p in PATTERNS:
+        c = int((sub["G"] == p).sum())
+        rows.append((group, value, p, c, c / n if n else float("nan")))
+    return rows
+
+
+def _group_rows(flags: pd.DataFrame, col: str) -> list[tuple]:
+    keys = flags[col].map(_value_label)
+    rows = []
+    for value in sorted(keys.unique()):
+        rows.extend(_pattern_rows(col, value, flags[keys == value]))
+    return rows
+
+
+def _status_rows(status_counts: dict[str, pd.Series]) -> list[tuple]:
+    return [
+        ("chip_status", layer, status, int(counts.get(status, 0)), float("nan"))
+        for layer, counts in status_counts.items()
+        for status in chips.STATUSES
+    ]
+
+
 def coverage_by_pattern(
     flags: pd.DataFrame, status_counts: dict[str, pd.Series] | None = None
 ) -> pd.DataFrame:
@@ -110,24 +137,11 @@ def coverage_by_pattern(
     columns exist. `status_counts` maps layer id to chip status counts and adds
     `chip_status` rows (no share).
     """
-    rows = []
-
-    def add(group: str, value: str, sub: pd.DataFrame) -> None:
-        n = len(sub)
-        for p in PATTERNS:
-            c = int((sub["G"] == p).sum())
-            rows.append((group, value, p, c, c / n if n else float("nan")))
-
-    add("overall", "all", flags)
+    rows = _pattern_rows("overall", "all", flags)
     for col in ("label_raw", "y_collapse"):
-        if col not in flags:
-            continue
-        keys = flags[col].map(_value_label)
-        for value in sorted(keys.unique()):
-            add(col, value, flags[keys == value])
-    for layer, counts in (status_counts or {}).items():
-        for status in chips.STATUSES:
-            rows.append(("chip_status", layer, status, int(counts.get(status, 0)), float("nan")))
+        if col in flags:
+            rows.extend(_group_rows(flags, col))
+    rows.extend(_status_rows(status_counts or {}))
     return pd.DataFrame(rows, columns=["group", "value", "pattern", "count", "share"])
 
 
