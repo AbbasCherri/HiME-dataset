@@ -89,6 +89,25 @@ class TileChipConfig:
 
 
 @dataclass(frozen=True)
+class FetchConfig:
+    """Network etiquette for the GSI tile server."""
+
+    user_agent: str
+    max_concurrent: int
+    max_requests_per_s: float
+    max_retries: int
+    """Retries after the first attempt, so a failing tile is tried `max_retries + 1` times."""
+    backoff_base_s: float
+    """Delay before retry n is `backoff_base_s * 2**n` (timeouts and 5xx)."""
+    throttle_backoff_base_s: float
+    """Same, but used after a 429 or 503."""
+    backoff_max_s: float
+    timeout_s: float
+    precheck_zoom: int
+    """A 404 parent at this zoom marks every descendant tile missing, unrequested."""
+
+
+@dataclass(frozen=True)
 class AuditConfig:
     n_collapsed: int
     n_survived: int
@@ -143,6 +162,7 @@ class Config:
     old_class_counts: OldClassCounts
     baseline_imagery: BaselineImagery
     tile_chip: TileChipConfig
+    fetch: FetchConfig
     audit: AuditConfig
     coverage_threshold: float
     moran: MoranConfig
@@ -196,6 +216,17 @@ CONFIG = Config(
         url_template="https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg",
     ),
     tile_chip=TileChipConfig(zoom=18, tile_size_px=256, chip_size_px=128),
+    fetch=FetchConfig(
+        user_agent="notodata/0.1 (Noto 2024 research dataset build; polite fetcher)",
+        max_concurrent=8,
+        max_requests_per_s=10.0,
+        max_retries=5,
+        backoff_base_s=1.0,
+        throttle_backoff_base_s=5.0,
+        backoff_max_s=60.0,
+        timeout_s=30.0,
+        precheck_zoom=14,
+    ),
     audit=AuditConfig(n_collapsed=20, n_survived=20, seed=0, decision_threshold=10),
     coverage_threshold=0.80,
     moran=MoranConfig(
