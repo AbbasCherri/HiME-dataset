@@ -38,4 +38,3 @@ def test_deviations_table_logs_every_non_brief_number():
     text = (repo_root() / "DATASET.md").read_text()
     missing = [snippet for snippet in _REQUIRED_SNIPPETS if snippet not in text]
     assert not missing, f"DATASET.md is missing: {missing}"
-
