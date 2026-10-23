@@ -10,10 +10,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 
-from notodata.config import CONFIG
+from notodata.config import CONFIG, GSI_TILE_LIST_URL, GSI_XYZ_BASE
 
-TILE_LIST_URL = "https://maps.gsi.go.jp/development/ichiran.html"
-_XYZ = "https://cyberjapandata.gsi.go.jp/xyz/{layer_id}/{{z}}/{{x}}/{{y}}.{ext}"
+TILE_LIST_URL = GSI_TILE_LIST_URL
+_XYZ = GSI_XYZ_BASE + "/{layer_id}/{{z}}/{{x}}/{{y}}.{ext}"
 _FOUND_IN = "GSI tile list page (ichiran.html)"
 
 
