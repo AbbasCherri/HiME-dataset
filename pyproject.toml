@@ -18,6 +18,8 @@ dependencies = [
     "datasets>=3.0",
     "requests>=2.32",
     "Pillow>=10.4",
+    "geopandas>=1.0",
+    "pyogrio>=0.10",
 ]
 
 [project.optional-dependencies]

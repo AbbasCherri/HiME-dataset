@@ -1,9 +1,8 @@
-"""Skeleton hygiene check (full enforcement lands once tiles.py/source.py exist).
+"""Import boundaries: each external dependency has one designated module.
 
-Only `tiles.py` may import `requests`; only `source.py` may import
-`huggingface_hub` or `datasets`. Today neither file exists, so this passes
-vacuously -- the point is that it starts failing the moment some other
-module reaches for one of these imports.
+Only `tiles.py` may import `requests`; only `source.py` may import geopandas or
+pyogrio. Raw data never goes through the Hugging Face libraries (rulings P9-P12),
+so no module may import `huggingface_hub` or `datasets`.
 """
 
 import ast
@@ -13,8 +12,10 @@ from _fsscan import repo_root
 
 _FORBIDDEN = {
     "requests": {"tiles.py"},
-    "huggingface_hub": {"source.py"},
-    "datasets": {"source.py"},
+    "geopandas": {"source.py"},
+    "pyogrio": {"source.py"},
+    "huggingface_hub": set(),
+    "datasets": set(),
 }
 
 

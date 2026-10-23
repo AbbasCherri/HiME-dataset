@@ -24,6 +24,9 @@ Sourced from Vescovo et al. 2025 (ESSD 17, 5259-5276), section 2.2: code 9 is
 inconsistent" footprint. Quoted in DATASET.md and notes/phase0.md.
 """
 
+CLIENT_COUNTS: tuple[int, ...] = (50, 100, 200)
+"""Client counts N built by default (DATASET.md deviation row 4)."""
+
 GSI_XYZ_BASE: str = "https://cyberjapandata.gsi.go.jp/xyz"
 """Host and path prefix of every GSI tile layer: `<base>/<layer_id>/{z}/{x}/{y}.<ext>`."""
 
