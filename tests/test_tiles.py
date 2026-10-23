@@ -364,3 +364,32 @@ def test_z14_precheck_safe(server, tmp_home, tmp_path, monkeypatch):
     plain = _fetcher(server, other, settings=off)
     got_off = [plain.get(LAYER, z, x, y) is None for x, y in tiles_]
     assert got_off == got
+
+
+def test_prefetch_many_bounds_inflight_work_and_keeps_nothing(server, tmp_home, monkeypatch):
+    f = _fetcher(server, tmp_home)
+    gate = threading.Event()
+    drawn = []
+    orig = f._fetch_raw
+
+    def slow(*a, **k):
+        gate.wait(5)
+        return orig(*a, **k)
+
+    monkeypatch.setattr(f, "_fetch_raw", slow)
+    monkeypatch.setattr(tiles, "_decode", lambda *a: pytest.fail("prefetch must not decode"))
+
+    def ids():
+        for i in range(500):
+            drawn.append(i)
+            yield (LAYER, 18, i, 0)
+
+    out = []
+    t = threading.Thread(target=lambda: out.append(f.prefetch_many(ids(), workers=8)))
+    t.start()
+    time.sleep(0.3)
+    assert len(drawn) <= 8 * tiles._WINDOW_PER_WORKER + 1  # not all 500 queued up front
+    gate.set()
+    t.join(30)
+    assert out == [500]
+    assert server.max_active <= 8

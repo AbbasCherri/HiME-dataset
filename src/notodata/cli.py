@@ -440,8 +440,8 @@ def _fetch_layer(ctx: Context, layer_id: str, wanted: list[tuple[int, int]]) -> 
 
     fetcher = _fetcher(ctx, layer_id)
     ids = [(layer_id, CONFIG.tile_chip.zoom, x, y) for x, y in wanted]
-    if hasattr(fetcher, "fetch_many"):
-        fetcher.fetch_many(ids)
+    if hasattr(fetcher, "prefetch_many"):
+        fetcher.prefetch_many(ids)
     else:
         for tile_id in ids:
             fetcher.get(*tile_id)

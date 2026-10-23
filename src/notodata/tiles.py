@@ -14,7 +14,7 @@ import os
 import threading
 import time
 from collections.abc import Callable, Iterable
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from io import BytesIO
 from pathlib import Path
 from typing import Protocol
@@ -29,6 +29,7 @@ from notodata.config import CONFIG, FetchConfig
 log = logging.getLogger(__name__)
 
 _THROTTLE_STATUSES = frozenset({429, 503})
+_WINDOW_PER_WORKER = 4  # tiles queued per worker in prefetch_many
 
 
 class TileShapeError(ValueError):
@@ -195,12 +196,47 @@ class HttpTileFetcher:
         with ThreadPoolExecutor(workers or self._s.max_concurrent) as pool:
             return dict(zip(tile_ids, pool.map(lambda t: self.get(*t), tile_ids), strict=True))
 
-    def _fetch_raw(self, z: int, x: int, y: int) -> bytes | None:
+    def prefetch_many(
+        self, tile_ids: Iterable[tuple[str, int, int, int]], workers: int | None = None
+    ) -> int:
+        """Cache many tiles on disk without decoding or keeping any; returns the count.
+
+        At most `workers * _WINDOW_PER_WORKER` tiles are submitted at once and ids are
+        drawn lazily, so memory stays flat however many tiles there are. A tile that
+        fails after retries raises.
+        """
+        n = workers or self._s.max_concurrent
+        done = 0
+        pending: set = set()
+        with ThreadPoolExecutor(n) as pool:
+            for layer_id, z, x, y in tile_ids:
+                if len(pending) >= n * _WINDOW_PER_WORKER:
+                    finished, pending = wait(pending, return_when=FIRST_COMPLETED)
+                    done += len(finished)
+                    for fut in finished:
+                        fut.result()
+                pending.add(pool.submit(self._prefetch_one, layer_id, z, x, y))
+            for fut in pending:
+                fut.result()
+                done += 1
+        return done
+
+    def _prefetch_one(self, layer_id: str, z: int, x: int, y: int) -> None:
+        if layer_id != self.layer_id:
+            raise ValueError(f"fetcher is for layer {self.layer_id!r}, not {layer_id!r}")
+        pz = self._s.precheck_zoom
+        if pz > 0 and z > pz:
+            px, py = parent_tile(z, x, y, pz)
+            if self._fetch_raw(pz, px, py, keep=False) is None:
+                return
+        self._fetch_raw(z, x, y, keep=False)
+
+    def _fetch_raw(self, z: int, x: int, y: int, keep: bool = True) -> bytes | None:
         """Raw tile bytes from cache or server; `None` for a (cached) 404."""
         path = paths.tile_path(self.layer_id, z, x, y, self.ext)
         missing = path.with_suffix(".missing")
         if path.exists():
-            return path.read_bytes()
+            return path.read_bytes() if keep else b"cached"
         if missing.exists():
             return None
         body, last = self._download(z, x, y)
