@@ -206,20 +206,20 @@ class HttpTileFetcher:
         last, throttled = "no attempt", False
         for attempt in range(self._s.max_retries + 1):
             if attempt:
-                base = self._s.throttle_backoff_base_s if throttled else self._s.backoff_base_s
-                self._sleep(min(base * 2 ** (attempt - 1), self._s.backoff_max_s))
+                self._sleep(self._backoff(attempt, throttled))
             outcome, body, last = self._request(z, x, y)
-            if outcome == "ok":
-                _write_atomic(path, body)
-                return body
-            if outcome == "missing":
-                _write_atomic(missing, b"")
-                return None
+            if outcome in ("ok", "missing"):
+                _write_atomic(path if body else missing, body)
+                return body or None
             if outcome == "fatal":
                 break  # other 4xx will not improve with retries
             throttled = outcome == "throttle"
         self._record_failure(z, x, y, last)
         raise TileFetchError(f"{self.layer_id}/{z}/{x}/{y}: {last}")
+
+    def _backoff(self, attempt: int, throttled: bool) -> float:
+        base = self._s.throttle_backoff_base_s if throttled else self._s.backoff_base_s
+        return min(base * 2 ** (attempt - 1), self._s.backoff_max_s)
 
     def _request(self, z: int, x: int, y: int) -> tuple[str, bytes, str]:
         """One rate-limited GET, classified as ok, missing, throttle, retry or fatal."""
@@ -232,6 +232,8 @@ class HttpTileFetcher:
         except requests.RequestException as exc:
             return "retry", b"", type(exc).__name__
         status = resp.status_code
+        if status == 200 and not resp.content:
+            return "retry", b"", "empty body"
         if status == 200:
             return "ok", resp.content, "HTTP 200"
         if status == 404:
