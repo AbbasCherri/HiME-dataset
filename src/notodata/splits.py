@@ -40,8 +40,9 @@ def heldout_folds(seed: int) -> tuple[int, int]:
 def assign_roles(building_id, fold, xy, seed: int) -> pd.DataFrame:
     """Role per building for one seed.
 
-    `nearest_heldout_m` is set for every training-pool candidate (kept or
-    dropped) and is NaN for validation and test buildings.
+    `nearest_heldout_m` is set for every training-pool candidate, i.e. for
+    `train_pool` rows and also for `buffer_dropped` rows (so the dropped
+    distances stay auditable), and is NaN for validation and test buildings.
     """
     ids = np.asarray(building_id)
     fold = np.asarray(fold)
@@ -116,6 +117,8 @@ def fit_scaler(df: pd.DataFrame, split: pd.DataFrame, rows: str = "train", build
         ids = role.index[role == "train_pool"]
     else:
         ids = pd.Index(np.asarray(building_ids))
+        if not ids.is_unique:
+            raise ValueError("building_ids contains duplicates")
         bad = ids[role.reindex(ids).to_numpy() != "train_pool"]
         if len(bad):
             raise ValueError(f"{len(bad)} rows are not training-pool buildings, e.g. {bad[0]}")

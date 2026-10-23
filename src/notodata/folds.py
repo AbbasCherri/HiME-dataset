@@ -81,7 +81,11 @@ def assign_folds(x_m, y_m, y_collapse, l_km: float) -> pd.DataFrame:
 
 
 def fold_table(df: pd.DataFrame) -> pd.DataFrame:
-    """The `reports/folds.csv` table: one row per fold, plus a count per image pattern G."""
+    """The `reports/folds.csv` table: one row per fold, plus a count per image pattern G.
+
+    Rows with a NaN `G` are counted under `G_missing`, so the G columns always
+    sum to `buildings`.
+    """
     y = df["y_collapse"]
     parts = pd.DataFrame(
         {
@@ -103,6 +107,8 @@ def fold_table(df: pd.DataFrame) -> pd.DataFrame:
     labelled = out["collapsed"] + out["survived"]
     out["prevalence"] = (out["collapsed"] / labelled).where(labelled > 0)
     if "G" in df:
-        by_g = pd.crosstab(df["fold"].to_numpy(), df["G"].to_numpy()).add_prefix("G_")
+        by_g = pd.crosstab(df["fold"].to_numpy(), df["G"].fillna("missing").to_numpy()).add_prefix(
+            "G_"
+        )
         out = out.join(by_g)
     return out.reset_index()

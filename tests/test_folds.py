@@ -86,3 +86,12 @@ def test_fold_table_counts():
     assert t["unlabelled"].sum() == df["y_collapse"].isna().sum()
     assert (t["collapsed"] + t["survived"] + t["unlabelled"] == t["buildings"]).all()
     assert (t["G_IP"] + t["G_none"] == t["buildings"]).all()
+
+
+def test_fold_table_nan_g_counted_as_missing():
+    df = _frame()
+    df = pd.concat([df, folds.assign_folds(df["x_m"], df["y_m"], df["y_collapse"], 2.0)], axis=1)
+    df["G"] = np.where(df["building_id"] % 3 == 0, None, "IP")
+    t = folds.fold_table(df)
+    assert (t["G_IP"] + t["G_missing"] == t["buildings"]).all()
+    assert t["G_missing"].sum() == (df["building_id"] % 3 == 0).sum()

@@ -4,7 +4,7 @@ import pytest
 
 from conftest import synthetic_buildings
 from notodata import folds, splits
-from notodata.config import CONFIG
+from notodata.config import CONFIG, EARTH_RADIUS_M
 from notodata.geometry import min_distance, project, reference_point
 
 SEEDS = CONFIG.test_seeds
@@ -47,9 +47,32 @@ def test_roles_disjoint(df):
         assert not pool["fold"].isin([test_f, val_f]).any()
 
 
+def _haversine_m(lat1, lon1, lat2, lon2):
+    p1, p2 = np.radians(lat1), np.radians(lat2)
+    a = (
+        np.sin((p2 - p1) / 2) ** 2
+        + np.cos(p1) * np.cos(p2) * np.sin(np.radians(lon2 - lon1) / 2) ** 2
+    )
+    return 2 * EARTH_RADIUS_M * np.arcsin(np.sqrt(a))
+
+
+def _assert_geodesic_buffer(full):
+    """Independent of the projection: the 200 closest kept buildings, brute-force haversine."""
+    train = full[full.role == "train_pool"].nsmallest(200, "nearest_heldout_m")
+    held = full[full.role.isin(["val", "test"])]
+    d = _haversine_m(
+        train["lat"].to_numpy()[:, None],
+        train["lon"].to_numpy()[:, None],
+        held["lat"].to_numpy()[None, :],
+        held["lon"].to_numpy()[None, :],
+    ).min(axis=1)
+    # equirectangular error is under 2 m on 500 m (spec risk table)
+    assert (d >= CONFIG.folds.buffer_m - 2.0).all()
+
+
 def test_buffer_500m(df):
     for s in SEEDS:
-        sp = _split(df, s).merge(df[["building_id", "x_m", "y_m"]])
+        sp = _split(df, s).merge(df[["building_id", "x_m", "y_m", "lat", "lon"]])
         held = sp[sp.role.isin(["val", "test"])][["x_m", "y_m"]].to_numpy()
         train = sp[sp.role == "train_pool"]
         assert len(train) > 0
@@ -59,7 +82,12 @@ def test_buffer_500m(df):
         dropped = sp[sp.role == "buffer_dropped"]
         dd = min_distance(dropped[["x_m", "y_m"]].to_numpy(), held)
         assert (dd < CONFIG.folds.buffer_m).all()
+        _assert_geodesic_buffer(sp)
         assert sp.loc[sp.role.isin(["val", "test"]), "nearest_heldout_m"].isna().all()
+
+
+def test_buffer_drops_something(df):
+    assert any((_split(df, s)["role"] == "buffer_dropped").any() for s in SEEDS)
 
 
 def test_each_fold_tested_once():
@@ -94,6 +122,8 @@ def test_scaler_train_only(df):
     held_id = sp.loc[sp.role == "test", "building_id"].iloc[0]
     with pytest.raises(ValueError, match="not training-pool"):
         splits.fit_scaler(df, sp, building_ids=[*train_ids.iloc[:50], held_id])
+    with pytest.raises(ValueError, match="duplicates"):
+        splits.fit_scaler(df, sp, building_ids=[train_ids.iloc[0], train_ids.iloc[0]])
     dropped_id = sp.loc[sp.role == "buffer_dropped", "building_id"].iloc[0]
     with pytest.raises(ValueError, match="not training-pool"):
         splits.fit_scaler(df, sp, building_ids=[dropped_id])
