@@ -1,0 +1,13 @@
+# Keep the build context tiny and secret-free.
+.git
+.env
+docs/
+data/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.complexipy_cache/
+audit/key.csv
+**/audit/key.csv
