@@ -89,6 +89,18 @@ class TileChipConfig:
 
 
 @dataclass(frozen=True)
+class BlankChipConfig:
+    """When a chip counts as `blank` (DATASET.md deviation row 7)."""
+
+    std_below: float
+    """Pixel standard deviation over all channels below this is blank."""
+    black_level: int
+    """A pixel is near-black when every channel is at most this."""
+    black_share: float
+    """Blank when at least this share of pixels is near-black."""
+
+
+@dataclass(frozen=True)
 class FetchConfig:
     """Network etiquette for the GSI tile server."""
 
@@ -163,6 +175,7 @@ class Config:
     baseline_imagery: BaselineImagery
     tile_chip: TileChipConfig
     fetch: FetchConfig
+    blank_chip: BlankChipConfig
     audit: AuditConfig
     coverage_threshold: float
     moran: MoranConfig
@@ -227,6 +240,7 @@ CONFIG = Config(
         timeout_s=30.0,
         precheck_zoom=14,
     ),
+    blank_chip=BlankChipConfig(std_below=2.0, black_level=3, black_share=0.5),
     audit=AuditConfig(n_collapsed=20, n_survived=20, seed=0, decision_threshold=10),
     coverage_threshold=0.80,
     moran=MoranConfig(

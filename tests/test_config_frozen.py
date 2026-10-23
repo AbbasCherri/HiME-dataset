@@ -129,3 +129,10 @@ def test_assignment_raises(get_instance, field_name):
     instance = get_instance()
     with pytest.raises(dataclasses.FrozenInstanceError):
         setattr(instance, field_name, object())
+
+
+def test_blank_chip_thresholds():
+    b = config.CONFIG.blank_chip
+    assert (b.std_below, b.black_level, b.black_share) == (2.0, 3, 0.5)
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        b.std_below = 1.0  # type: ignore[misc]

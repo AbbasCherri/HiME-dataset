@@ -33,15 +33,6 @@ log = logging.getLogger(__name__)
 
 STATUSES = ("ok", "missing", "partial", "blank", "error")
 
-BLANK_STD_BELOW = 2.0
-"""A chip whose pixel standard deviation (all channels) is below this is blank."""
-
-BLACK_LEVEL = 3
-"""A pixel is near-black when every channel is within this many levels of 0."""
-
-BLACK_SHARE = 0.5
-"""A chip with at least this share of near-black pixels is blank."""
-
 _INDEX_COLUMNS = ["building_id", "status", "path", "sha256"]
 
 
@@ -59,10 +50,11 @@ def pixel_sha256(pixels: np.ndarray) -> str:
 
 
 def _is_blank(rgb: np.ndarray) -> bool:
-    if float(rgb.std()) < BLANK_STD_BELOW:
+    cfg = CONFIG.blank_chip
+    if float(rgb.std()) < cfg.std_below:
         return True
-    near_black = (rgb <= BLACK_LEVEL).all(axis=-1)
-    return float(near_black.mean()) >= BLACK_SHARE
+    near_black = (rgb <= cfg.black_level).all(axis=-1)
+    return float(near_black.mean()) >= cfg.black_share
 
 
 def _rgba(tile: np.ndarray) -> np.ndarray:
@@ -84,8 +76,8 @@ def build_chip(fetcher: TileFetcher, layer_id: str, lat: float, lon: float) -> C
     x0, y0 = int(x0a), int(y0a)
     half = chip // 2
     # the building lies at chip pixel (64, 64) to within one pixel
-    assert half <= gx - x0 < half + 1, (gx - x0, gy - y0)
-    assert half <= gy - y0 < half + 1, (gx - x0, gy - y0)
+    if not (half <= gx - x0 < half + 1 and half <= gy - y0 < half + 1):
+        raise RuntimeError(f"building not at chip centre: ({gx - x0}, {gy - y0})")
 
     tiles = tuple(covering_tiles(x0, y0))
     got: dict[tuple[int, int], np.ndarray | None] = {}
@@ -154,8 +146,8 @@ def build_chips(fetcher: TileFetcher, layer_id: str, buildings: pd.DataFrame) ->
         "chips %s: %s (blank if std < %s or >= %s near black within %s)",
         layer_id,
         counts,
-        BLANK_STD_BELOW,
-        BLACK_SHARE,
-        BLACK_LEVEL,
+        CONFIG.blank_chip.std_below,
+        CONFIG.blank_chip.black_share,
+        CONFIG.blank_chip.black_level,
     )
     return pd.DataFrame(rows, columns=_INDEX_COLUMNS)

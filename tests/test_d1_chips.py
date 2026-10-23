@@ -13,6 +13,9 @@ from notodata.tiles import TileFetchError, TileShapeError, covering_tiles, globa
 LAYER = "stub"
 Z = CONFIG.tile_chip.zoom
 STUB = CONFIG.d1_test_stub
+T = CONFIG.tile_chip.tile_size_px
+CHIP = CONFIG.tile_chip.chip_size_px
+HALF = CHIP // 2
 
 
 def _points(n=STUB.n_points, seed=STUB.seed):
@@ -23,8 +26,8 @@ def _points(n=STUB.n_points, seed=STUB.seed):
 
 def _expected_centre(lat, lon):
     gx, gy = global_pixel(lat, lon, Z)
-    x0, y0 = math.floor(gx - 64), math.floor(gy - 64)
-    return ((x0 + 64) % STUB.mod_u, (y0 + 64) % STUB.mod_v, STUB.channel_b)
+    x0, y0 = math.floor(gx - HALF), math.floor(gy - HALF)
+    return ((x0 + HALF) % STUB.mod_u, (y0 + HALF) % STUB.mod_v, STUB.channel_b)
 
 
 def test_chip_matches_stub_1000_points():
@@ -32,9 +35,9 @@ def test_chip_matches_stub_1000_points():
     for lat, lon in zip(lats, lons, strict=True):
         res = chips.build_chip(StubFetcher(), LAYER, lat, lon)
         assert res.status == "ok"
-        assert res.pixels.shape == (128, 128, 3)
+        assert res.pixels.shape == (CHIP, CHIP, 3)
         assert res.pixels.dtype == np.uint8
-        assert tuple(int(v) for v in res.pixels[64, 64]) == _expected_centre(lat, lon)
+        assert tuple(int(v) for v in res.pixels[HALF, HALF]) == _expected_centre(lat, lon)
 
 
 def test_50m_east_west_differs():
@@ -53,17 +56,17 @@ def test_tile_corner_point():
     lat = math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * ty / n))))
     res = chips.build_chip(StubFetcher(), LAYER, lat, lon)
     assert res.status == "ok"
-    assert res.pixels.shape == (128, 128, 3)
+    assert res.pixels.shape == (CHIP, CHIP, 3)
     assert len(res.tiles_used) == 4
 
 
 def test_building_at_centre():
     lats, lons = _points()
     gx, gy = global_pixel(lats, lons, Z)
-    x0 = np.floor(gx - 64)
-    y0 = np.floor(gy - 64)
-    assert ((gx - x0 >= 64) & (gx - x0 < 65)).all()
-    assert ((gy - y0 >= 64) & (gy - y0 < 65)).all()
+    x0 = np.floor(gx - HALF)
+    y0 = np.floor(gy - HALF)
+    assert ((gx - x0 >= HALF) & (gx - x0 < HALF + 1)).all()
+    assert ((gy - y0 >= HALF) & (gy - y0 < HALF + 1)).all()
     # build_chip asserts the same internally; it must not raise for any point
     for lat, lon in zip(lats[:200], lons[:200], strict=True):
         chips.build_chip(StubFetcher(), LAYER, lat, lon)
@@ -72,14 +75,14 @@ def test_building_at_centre():
 def test_tiles_used_matches_covering_tiles():
     lat, lon = 37.3, 137.0
     gx, gy = global_pixel(lat, lon, Z)
-    x0, y0 = math.floor(gx - 64), math.floor(gy - 64)
+    x0, y0 = math.floor(gx - HALF), math.floor(gy - HALF)
     res = chips.build_chip(StubFetcher(), LAYER, lat, lon)
     assert list(res.tiles_used) == covering_tiles(x0, y0)
 
 
 class _BadShape:
     def get(self, layer_id, z, x, y):
-        return np.zeros((256, 255, 3), dtype=np.uint8)
+        return np.zeros((T, T - 1, 3), dtype=np.uint8)
 
 
 def test_non_256_tile_raises():
@@ -92,7 +95,7 @@ class _Const:
 
     def __init__(self, value, alpha=None):
         ch = len(value) + (alpha is not None)
-        self._tile = np.zeros((256, 256, ch), dtype=np.uint8)
+        self._tile = np.zeros((T, T, ch), dtype=np.uint8)
         self._tile[:, :, : len(value)] = value
         if alpha is not None:
             self._tile[:, :, 3] = alpha
@@ -109,7 +112,7 @@ class _Raises:
 def test_status_missing():
     lat, lon = 37.3, 137.0
     gx, gy = global_pixel(lat, lon, Z)
-    first = covering_tiles(math.floor(gx - 64), math.floor(gy - 64))[0]
+    first = covering_tiles(math.floor(gx - HALF), math.floor(gy - HALF))[0]
     f = FailingFetcher({(LAYER, Z, *first)})
     res = chips.build_chip(f, LAYER, lat, lon)
     assert res.status == "missing"
@@ -131,8 +134,8 @@ def test_status_partial_alpha_zero_inside_window():
 def test_alpha_zero_outside_window_is_not_partial():
     class OneCorner:
         def get(self, layer_id, z, x, y):
-            t = np.zeros((256, 256, 4), dtype=np.uint8)
-            t[:, :, 0] = (np.arange(256)[None, :] * 7 + np.arange(256)[:, None] * 3) % 200 + 20
+            t = np.zeros((T, T, 4), dtype=np.uint8)
+            t[:, :, 0] = (np.arange(T)[None, :] * 7 + np.arange(T)[:, None] * 3) % 200 + 20
             t[:, :, 1] = 90
             t[:, :, 2] = 150
             t[:, :, 3] = 255
@@ -140,14 +143,14 @@ def test_alpha_zero_outside_window_is_not_partial():
             t[:2, :2, 3] = 0
             return t
 
-    # tile-centre point: window [64, 192) of a single tile
+    # tile-centre point: window is the tile centre, one tile
     n = 2.0**Z
     tx, ty = 230_000, 103_000
     lon = (tx + 0.5) / n * 360.0 - 180.0
     lat = math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * (ty + 0.5) / n))))
     res = chips.build_chip(OneCorner(), LAYER, lat, lon)
     assert res.status == "ok"
-    assert res.pixels.shape == (128, 128, 3)
+    assert res.pixels.shape == (CHIP, CHIP, 3)
 
 
 def test_status_blank_black_and_flat():
@@ -155,28 +158,57 @@ def test_status_blank_black_and_flat():
     assert chips.build_chip(_Const((120, 120, 120)), LAYER, 37.3, 137.0).status == "blank"
 
 
-def test_blank_half_near_black():
-    class HalfDark:
+def _dark_columns_chip(k):
+    """Noisy tiles whose first `k` window columns are near black (global columns)."""
+    lat, lon = 37.3, 137.0
+    gx, _ = global_pixel(lat, lon, Z)
+    x0 = math.floor(gx - HALF)
+
+    class Dark:
         def get(self, layer_id, z, x, y):
             rng = np.random.default_rng(1)
-            t = rng.integers(40, 255, (256, 256, 3), dtype=np.uint8)
-            t[:, :128] = 2  # left half of every tile is near black
+            t = rng.integers(40, 255, (T, T, 3), dtype=np.uint8)
+            cols = x * T + np.arange(T)
+            t[:, (cols >= x0) & (cols < x0 + k)] = 1
             return t
 
+    return chips.build_chip(Dark(), LAYER, lat, lon)
+
+
+def test_blank_half_near_black():
+    # high std, so only the near-black share can decide
+    assert _dark_columns_chip(CHIP // 2).status == "blank"
+    assert _dark_columns_chip(CHIP // 2 - 1).status == "ok"
+
+
+def _edge_point(horizontal):
+    """A point on a tile edge so the window spans exactly two tiles."""
     n = 2.0**Z
     tx, ty = 230_000, 103_000
-    # window [0,128) of the tile's left half: whole chip near black
-    lon = (tx + 64 / 256) / n * 360.0 - 180.0
-    lat = math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * (ty + 0.5) / n))))
-    assert chips.build_chip(HalfDark(), LAYER, lat, lon).status == "blank"
+    if horizontal:
+        lon = (tx + 1) / n * 360.0 - 180.0
+        lat = math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * (ty + 0.5) / n))))
+    else:
+        lon = (tx + 0.5) / n * 360.0 - 180.0
+        lat = math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * (ty + 1) / n))))
+    return lat, lon
+
+
+@pytest.mark.parametrize("horizontal", [True, False])
+def test_two_tile_window(horizontal):
+    lat, lon = _edge_point(horizontal)
+    res = chips.build_chip(StubFetcher(), LAYER, lat, lon)
+    assert res.status == "ok"
+    assert len(res.tiles_used) == 2
+    assert tuple(int(v) for v in res.pixels[HALF, HALF]) == _expected_centre(lat, lon)
 
 
 def test_just_under_half_near_black_is_ok():
     class Stripe:
         def get(self, layer_id, z, x, y):
             rng = np.random.default_rng(1)
-            t = rng.integers(40, 255, (256, 256, 3), dtype=np.uint8)
-            t[:, :, :] = np.where((np.arange(256) % 4 == 0)[None, :, None], 1, t)
+            t = rng.integers(40, 255, (T, T, 3), dtype=np.uint8)
+            t[:, :, :] = np.where((np.arange(T) % 4 == 0)[None, :, None], 1, t)
             return t  # a quarter of the pixels near black
 
     assert chips.build_chip(Stripe(), LAYER, 37.3, 137.0).status == "ok"
@@ -186,8 +218,8 @@ def test_near_black_needs_every_channel():
     # bright red channel keeps pixels from counting as near black; std is high enough
     class RedOnly:
         def get(self, layer_id, z, x, y):
-            t = np.zeros((256, 256, 3), dtype=np.uint8)
-            t[:, :, 0] = (np.arange(256)[None, :] * 5) % 256
+            t = np.zeros((T, T, 3), dtype=np.uint8)
+            t[:, :, 0] = (np.arange(T)[None, :] * 5) % 256
             t[:, :, 0] += 30
             return t
 
@@ -207,7 +239,7 @@ def test_only_ok_chips_written_and_hash_stable(tmp_home):
 
     lats, lons = _points(20)
     df = pd.DataFrame({"building_id": np.arange(5000, 5020), "lat": lats, "lon": lons})
-    first = covering_tiles(*(math.floor(v - 64) for v in global_pixel(lats[3], lons[3], Z)))[0]
+    first = covering_tiles(*(math.floor(v - HALF) for v in global_pixel(lats[3], lons[3], Z)))[0]
     fetcher = FailingFetcher({(LAYER, Z, *first)})
     index = chips.build_chips(fetcher, LAYER, df)
     assert list(index.columns) == ["building_id", "status", "path", "sha256"]
@@ -223,7 +255,7 @@ def test_only_ok_chips_written_and_hash_stable(tmp_home):
         assert p.exists()
         assert p.relative_to(paths.notodata_home()).as_posix() == row.path
         arr = np.asarray(Image.open(p))
-        assert arr.shape == (128, 128, 3)
+        assert arr.shape == (CHIP, CHIP, 3)
         assert chips.pixel_sha256(arr) == row.sha256
     written = list(paths.chips_dir(LAYER).rglob("*.png"))
     assert len(written) == len(ok)
@@ -243,8 +275,8 @@ def _old_chip_centre_global_pixel(lat, lon):
     the tile corner, whatever the point's position inside the tile.
     """
     gx, gy = global_pixel(lat, lon, Z)
-    tx, ty = int(gx // 256), int(gy // 256)
-    return tx * 256 + 256, ty * 256 + 256, gx, gy
+    tx, ty = int(gx // T), int(gy // T)
+    return tx * T + T, ty * T + T, gx, gy
 
 
 def test_old_bug_disagrees_with_new_code():
@@ -253,11 +285,11 @@ def test_old_bug_disagrees_with_new_code():
     disagree = 0
     for lat, lon in zip(lats, lons, strict=True):
         cx, cy, gx, gy = _old_chip_centre_global_pixel(lat, lon)
-        if abs(cx - gx) < 64 and abs(cy - gy) < 64:
+        if abs(cx - gx) < HALF and abs(cy - gy) < HALF:
             inside += 1
         res = chips.build_chip(StubFetcher(), LAYER, lat, lon)
-        old_centre = ((cx) % STUB.mod_u, (cy) % STUB.mod_v, 0)
-        if tuple(int(v) for v in res.pixels[64, 64]) != old_centre:
+        old_centre = ((cx) % STUB.mod_u, (cy) % STUB.mod_v, STUB.channel_b)
+        if tuple(int(v) for v in res.pixels[HALF, HALF]) != old_centre:
             disagree += 1
     # old tile maths: a building lies in its chip for only a small share of points
     assert inside / len(lats) < 0.15
