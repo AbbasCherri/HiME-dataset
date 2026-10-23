@@ -13,6 +13,9 @@ from dataclasses import dataclass
 PIPELINE_VERSION: int = 1
 """Bumped by hand whenever chip maths or another cache-defining step changes."""
 
+EARTH_RADIUS_M: float = 6_371_008.8
+"""IUGG mean Earth radius in metres, used by the equirectangular projection."""
+
 CODE99_MEANING: str = "missing_inconsistent"
 """One of `no_longer_present`, `missing_inconsistent` or `unknown`.
 
