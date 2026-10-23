@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -21,6 +22,8 @@ from notodata.io import atomic_write, sha256_file
 
 TREE_SUFFIX = "@tree"
 """Manifest name of a layer's chip tree hash: `chips/<layer>/@tree`."""
+
+log = logging.getLogger(__name__)
 
 _SEP = "  "
 _TILE_SKIP_SUFFIXES = {".missing", ".tmp"}
@@ -97,6 +100,7 @@ def collect_entries(layer_ids: Iterable[str], root: Path | None = None) -> dict[
             add(p, home)
     for layer in layer_ids:
         if not paths.chip_index_path(layer).exists():
+            log.warning("layer %s has no chip index; left out of the manifest", layer)
             continue  # reported as missing by `verify_manifest`
         add(paths.chip_index_path(layer), home)
         entries[f"chips/{layer}/{TREE_SUFFIX}"] = chip_tree_hash(layer)

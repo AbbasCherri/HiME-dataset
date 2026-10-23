@@ -82,24 +82,59 @@ def _corrupt_block_id(t):
     t.loc[0, "block_id"] = "nope"
 
 
-@pytest.mark.parametrize(
-    "corrupt",
-    [
-        _corrupt_dup,
-        _corrupt_has_post,
-        _corrupt_g,
-        _corrupt_fold,
-        _corrupt_geometry,
-        _corrupt_label,
-        _corrupt_absolute,
-        _corrupt_block_id,
-    ],
-)
-def test_table_invariants(corrupt):
+def _first_post(t):
+    return t.index[t["has_post"] == 1][0]
+
+
+def _corrupt_label_source(t):
+    t.loc[0, "label_source"] = "guess"
+
+
+def _corrupt_label_conflict(t):
+    t.loc[0, "label_conflict"] = 2
+
+
+def _corrupt_y_collapse(t):
+    t.loc[t.index[t["y_collapse"].notna()][0], "y_collapse"] = 0.5
+
+
+def _corrupt_observable(t):
+    i = t.index[t["y_collapse"].notna()][0]
+    t.loc[i, "observable"] = 0.0
+
+
+def _corrupt_has_post_range(t):
+    t.loc[_first_post(t), "has_post"] = 2
+
+
+def _corrupt_post_status(t):
+    t.loc[_first_post(t), "post_status"] = "missing"
+
+
+CORRUPTIONS = [
+    (_corrupt_dup, "building_id is not unique"),
+    (_corrupt_has_post, "has_post disagrees with post_chip"),
+    (_corrupt_g, "G is inconsistent"),
+    (_corrupt_fold, "fold outside"),
+    (_corrupt_geometry, "NaN or infinite"),
+    (_corrupt_label, "label_raw outside"),
+    (_corrupt_absolute, "post_chip holds an absolute"),
+    (_corrupt_block_id, "block_id is not"),
+    (_corrupt_label_source, "label_source outside"),
+    (_corrupt_label_conflict, "label_conflict is not"),
+    (_corrupt_y_collapse, "y_collapse is not 0, 1 or NaN"),
+    (_corrupt_observable, "observable disagrees"),
+    (_corrupt_has_post_range, "has_post is not 0 or 1"),
+    (_corrupt_post_status, "has_post disagrees with post_status"),
+]
+
+
+@pytest.mark.parametrize(("corrupt", "message"), CORRUPTIONS)
+def test_table_invariants(corrupt, message):
     t = make_table()
     table.validate_table(t, pre_available=True)
     corrupt(t)
-    with pytest.raises(table.TableError):
+    with pytest.raises(table.TableError, match=message):
         table.validate_table(t, pre_available=True)
 
 

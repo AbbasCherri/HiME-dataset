@@ -30,6 +30,9 @@ GSI_XYZ_BASE: str = "https://cyberjapandata.gsi.go.jp/xyz"
 GSI_TILE_LIST_URL: str = "https://maps.gsi.go.jp/development/ichiran.html"
 """The GSI tile list page every layer in the registry was taken from."""
 
+LABEL_CODES: frozenset[int] = frozenset({0, 1, 9, 99})
+"""The raw damage codes a building may carry in `label_raw`."""
+
 MAX_LABEL_CONFLICT_SHARE: float = 0.01
 """Abort the load if `damage_val` and `label` disagree on more than this share of rows."""
 

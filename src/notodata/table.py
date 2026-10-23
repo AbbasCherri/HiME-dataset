@@ -16,7 +16,7 @@ import pandas as pd
 import pyarrow as pa
 
 from notodata import geometry, paths
-from notodata.config import CONFIG
+from notodata.config import CONFIG, LABEL_CODES
 from notodata.imagery import PATTERNS, image_pattern
 from notodata.io import write_parquet_deterministic
 
@@ -54,8 +54,6 @@ COLUMNS = list(SCHEMA.names)
 
 PRE_UNAVAILABLE = "unavailable"
 """`pre_status` of every row when no pre layer was chosen."""
-
-_CODES = {0, 1, 9, 99}
 
 
 class TableError(ValueError):
@@ -127,32 +125,47 @@ def _in_set(series: pd.Series, allowed: set) -> pd.Series:
     return series.isin(allowed) | series.isna()
 
 
-def _flag_problems(df: pd.DataFrame, pre_available: bool) -> list[str]:
-    problems = []
-    for side in ("post", "pre"):
-        has, chip, sha = df[f"has_{side}"], df[f"{side}_chip"], df[f"{side}_chip_sha256"]
-        if not has.isin([0, 1]).all():
-            problems.append(f"has_{side} is not 0 or 1")
-        if ((has == 1) != (chip != "")).any():
-            problems.append(f"has_{side} disagrees with {side}_chip being non-empty")
-        if ((chip != "") != (sha != "")).any():
-            problems.append(f"{side}_chip and {side}_chip_sha256 are not empty together")
-        if ((has == 1) != (df[f"{side}_status"] == "ok")).any():
-            problems.append(f"has_{side} disagrees with {side}_status == 'ok'")
-        if chip.str.startswith("/").any() or chip.str.contains("\\", regex=False).any():
-            problems.append(f"{side}_chip holds an absolute or non-posix path")
+def _side_problems(df: pd.DataFrame, side: str) -> list[str]:
+    has, chip, sha = df[f"has_{side}"], df[f"{side}_chip"], df[f"{side}_chip_sha256"]
+    checks = [
+        (~has.isin([0, 1]), f"has_{side} is not 0 or 1"),
+        ((has == 1) != (chip != ""), f"has_{side} disagrees with {side}_chip being non-empty"),
+        ((chip != "") != (sha != ""), f"{side}_chip and {side}_chip_sha256 are not empty together"),
+        (
+            (has == 1) != (df[f"{side}_status"] == "ok"),
+            f"has_{side} disagrees with {side}_status == 'ok'",
+        ),
+        (
+            chip.str.startswith("/") | chip.str.contains("\\", regex=False),
+            f"{side}_chip holds an absolute or non-posix path",
+        ),
+    ]
+    return [msg for mask, msg in checks if mask.any()]
+
+
+def _g_problems(df: pd.DataFrame, pre_available: bool) -> list[str]:
     expected_g = [image_pattern(a, b) for a, b in zip(df["has_post"], df["has_pre"], strict=True)]
-    if not df["G"].isin(PATTERNS).all() or (df["G"].to_numpy() != np.array(expected_g)).any():
-        problems.append("G is inconsistent with has_post and has_pre")
-    if not pre_available and (df["has_pre"] != 0).any():
-        problems.append("has_pre is 1 although pre_available is false")
-    return problems
+    checks = [
+        (
+            (~df["G"].isin(PATTERNS)) | (df["G"].to_numpy() != np.array(expected_g)),
+            "G is inconsistent with has_post and has_pre",
+        ),
+        (
+            pd.Series(not pre_available, index=df.index) & (df["has_pre"] != 0),
+            "has_pre is 1 although pre_available is false",
+        ),
+    ]
+    return [msg for mask, msg in checks if mask.any()]
+
+
+def _flag_problems(df: pd.DataFrame, pre_available: bool) -> list[str]:
+    return _side_problems(df, "post") + _side_problems(df, "pre") + _g_problems(df, pre_available)
 
 
 def _label_problems(df: pd.DataFrame) -> list[str]:
     problems = []
-    if not df["label_raw"].isin(_CODES).all():
-        problems.append(f"label_raw outside {sorted(_CODES)}")
+    if not df["label_raw"].isin(LABEL_CODES).all():
+        problems.append(f"label_raw outside {sorted(LABEL_CODES)}")
     sources = {CONFIG.label_column, CONFIG.label_fallback_column}
     if not df["label_source"].isin(sources).all():
         problems.append(f"label_source outside {sorted(sources)}")
