@@ -72,6 +72,10 @@ def _status_lookup(ids: pd.Series, index: pd.DataFrame | None, fallback: str) ->
     return by_id.loc[ids].to_numpy(dtype=object)
 
 
+def _origin(buildings: pd.DataFrame, origin: tuple[float, float] | None) -> tuple[float, float]:
+    return origin or geometry.reference_point(buildings["lat"], buildings["lon"])
+
+
 def assemble_table(
     buildings: pd.DataFrame,
     label_cols: pd.DataFrame,
@@ -95,7 +99,7 @@ def assemble_table(
     ids = buildings["building_id"].reset_index(drop=True).astype("int64")
     if not (flags["building_id"].reset_index(drop=True) == ids).all():
         raise ValueError("flags rows are not in the same order as buildings")
-    lat0, lon0 = origin or geometry.reference_point(buildings["lat"], buildings["lon"])
+    lat0, lon0 = _origin(buildings, origin)
     x, y = geometry.project(buildings["lat"], buildings["lon"], lat0, lon0)
     lab = label_cols.reset_index(drop=True)
     flg = flags.reset_index(drop=True)
