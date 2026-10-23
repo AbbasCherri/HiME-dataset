@@ -203,19 +203,26 @@ class HttpTileFetcher:
             return path.read_bytes()
         if missing.exists():
             return None
+        body, last = self._download(z, x, y)
+        if body is None and last is not None:
+            self._record_failure(z, x, y, last)
+            raise TileFetchError(f"{self.layer_id}/{z}/{x}/{y}: {last}")
+        _write_atomic(path if body else missing, body or b"")
+        return body
+
+    def _download(self, z: int, x: int, y: int) -> tuple[bytes | None, str | None]:
+        """Retry loop: `(bytes, None)`, `(None, None)` for a 404, or `(None, reason)`."""
         last, throttled = "no attempt", False
         for attempt in range(self._s.max_retries + 1):
             if attempt:
                 self._sleep(self._backoff(attempt, throttled))
             outcome, body, last = self._request(z, x, y)
             if outcome in ("ok", "missing"):
-                _write_atomic(path if body else missing, body)
-                return body or None
+                return (body or None), None
             if outcome == "fatal":
                 break  # other 4xx will not improve with retries
             throttled = outcome == "throttle"
-        self._record_failure(z, x, y, last)
-        raise TileFetchError(f"{self.layer_id}/{z}/{x}/{y}: {last}")
+        return None, last
 
     def _backoff(self, attempt: int, throttled: bool) -> float:
         base = self._s.throttle_backoff_base_s if throttled else self._s.backoff_base_s
