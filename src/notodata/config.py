@@ -24,6 +24,15 @@ Sourced from Vescovo et al. 2025 (ESSD 17, 5259-5276), section 2.2: code 9 is
 inconsistent" footprint. Quoted in DATASET.md and notes/phase0.md.
 """
 
+GSI_XYZ_BASE: str = "https://cyberjapandata.gsi.go.jp/xyz"
+"""Host and path prefix of every GSI tile layer: `<base>/<layer_id>/{z}/{x}/{y}.<ext>`."""
+
+GSI_TILE_LIST_URL: str = "https://maps.gsi.go.jp/development/ichiran.html"
+"""The GSI tile list page every layer in the registry was taken from."""
+
+MAX_LABEL_CONFLICT_SHARE: float = 0.01
+"""Abort the load if `damage_val` and `label` disagree on more than this share of rows."""
+
 
 @dataclass(frozen=True)
 class BuildingSource:
