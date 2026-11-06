@@ -1,0 +1,21 @@
+{
+  "a1_pre_layer": "nendophoto2022",
+  "best_post_layer": "20240102noto_0405_0426do",
+  "coverage_threshold": 0.8,
+  "decision_threshold": 10,
+  "n_audited_collapsed": 20,
+  "n_buildings": 140208,
+  "n_dropped": 0,
+  "n_kept": 140208,
+  "n_post": 9,
+  "n_pre": 0,
+  "n_seam": 11,
+  "post_capture_dates": [],
+  "post_coverage": 1.0,
+  "post_layer": "seamlessphoto",
+  "pre_available": false,
+  "pre_capture_dates": [],
+  "pre_coverage": 0.4605158050895812,
+  "pre_layer": "nendophoto2022",
+  "rule_row": 2
+}
