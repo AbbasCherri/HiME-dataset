@@ -1,0 +1,13 @@
+.env
+data/
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+.complexipy_cache/
+
+# Audit key stays out of version control until the human unblinds it; it is
+# then added explicitly once sign-off lands in the same commit.
+reports/audit/key.csv
+data/audit/key.csv

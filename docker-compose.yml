@@ -1,0 +1,88 @@
+# Only `pipeline`, `hf`, `verify` and `embed` see HF_TOKEN (through env_file).
+# `lint`, `test-unit`, `test` and `shell` are token-free on purpose: a test that needs the
+# network or the token must fail rather than silently pass.
+# Every bind mount carries :z (Fedora SELinux). The repo mount at /work already contains ./data.
+
+x-app: &app
+  image: notodata:dev
+  build:
+    context: .
+    args:
+      UID: ${NOTODATA_UID:-1000}
+      GID: ${NOTODATA_GID:-1000}
+  working_dir: /work
+  volumes:
+    - .:/work:z
+  environment: &env
+    NOTODATA_HOME: /work/data
+
+x-secret-env: &secret-env
+  - path: .env
+    required: false
+
+services:
+  lint:
+    <<: *app
+    command:
+      - sh
+      - -ec
+      - ruff check . && ruff format --check . && complexipy src --max-complexity-allowed 10
+
+  test-unit:
+    <<: *app
+    command: ["pytest", "-q", "-rs", "-m", "not real"]
+
+  test:
+    <<: *app
+    command: ["pytest", "-q", "-rs"]
+
+  shell:
+    <<: *app
+    command: ["bash"]
+
+  pipeline:
+    <<: *app
+    env_file: *secret-env
+    environment:
+      <<: *env
+      HF_HOME: /work/data/hf
+    command: ["python", "-m", "notodata"]
+
+  hf:
+    <<: *app
+    env_file: *secret-env
+    environment:
+      <<: *env
+      HF_HOME: /work/data/hf
+    entrypoint: ["hf"]
+
+  verify:
+    <<: *app
+    env_file: *secret-env
+    environment:
+      <<: *env
+      HF_HOME: /work/data/hf
+      VERIFY_HOME: /verify-home
+    volumes:
+      - .:/work:z
+      - verify-home:/verify-home
+    command: ["python", "-m", "notodata", "verify", "--reuse-tiles"]
+
+  embed:
+    <<: *app
+    profiles: ["embed"]
+    env_file: *secret-env
+    environment:
+      <<: *env
+      HF_HOME: /work/data/hf
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: ["python", "-m", "notodata", "embed"]
+
+volumes:
+  verify-home:
