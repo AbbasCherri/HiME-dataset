@@ -251,3 +251,13 @@ def test_geometry_reference_is_the_table_origin(env):
     x, y = geometry.project(table["lat"], table["lon"], float(ref["lat0"]), float(ref["lon0"]))
     assert abs(x - table["x_m"]).max() < 1e-3  # the reference is printed to 10 decimals
     assert abs(y - table["y_m"]).max() < 1e-3
+
+
+def test_verify_rebuild_chips_unavailable_pre_layer():
+    """The rebuild validates the decision against the pre layer's index, so it must be chipped."""
+    from notodata.cli import _chip_layers
+
+    decision = {"post_layer": "post", "pre_layer": "pre", "pre_available": False}
+    assert _chip_layers(decision) == ["post", "pre"]
+    no_pre = {"post_layer": "post", "pre_layer": None, "pre_available": False}
+    assert _chip_layers(no_pre) == ["post"]

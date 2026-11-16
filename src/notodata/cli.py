@@ -236,6 +236,14 @@ def _decision_layers(decision: dict) -> list[str]:
     return layers
 
 
+def _chip_layers(decision: dict) -> list[str]:
+    """Every layer the decision names: `_working` checks it against the pre layer's index."""
+    layers = [decision["post_layer"]]
+    if decision["pre_layer"] is not None:
+        layers.append(decision["pre_layer"])
+    return layers
+
+
 def _core_inputs(ctx: Context) -> list[Path]:
     from notodata import paths, source
 
@@ -845,7 +853,8 @@ def _tile_hint(layers: list[str], original: Path, rebuilt: Path) -> str:
     )
 
 
-def _rebuild(ctx: Context, entries: dict[str, str], layers: list[str], clean: bool):
+def _rebuild(ctx: Context, entries: dict[str, str], layers: list[str], clean: bool,
+             chip_layers: list[str] | None = None):  # fmt: skip
     """Rebuild into a throwaway home; return (problems, tile hint)."""
     from notodata import manifest, paths
 
@@ -855,7 +864,7 @@ def _rebuild(ctx: Context, entries: dict[str, str], layers: list[str], clean: bo
         sub = Context(get=ctx.get, fetcher_factory=ctx.fetcher_factory,
                       gpkg_md5=ctx.gpkg_md5, root=root)  # fmt: skip
         with _Swapped(home):
-            for argv in _rebuild_plan(entries, layers):
+            for argv in _rebuild_plan(entries, chip_layers or layers):
                 _run_or_stop(argv, sub)
             problems = manifest.verify_manifest(ctx.root / MANIFEST_NAME, layers, root=root)
         hint = _tile_hint(layers, original, home) if problems and clean else ""
@@ -867,7 +876,9 @@ def stage_verify(ctx: Context, args) -> int:
 
     path = _need(ctx.root / MANIFEST_NAME, "run `notodata manifest`")
     entries = manifest.read_manifest(path)
-    problems, hint = _rebuild(ctx, entries, _decision_layers(_decision(ctx)), args.clean)
+    decision = _decision(ctx)
+    problems, hint = _rebuild(ctx, entries, _decision_layers(decision), args.clean,
+                              _chip_layers(decision))  # fmt: skip
     failed = {p.split(":")[0] for p in problems}
     result = {
         "date": dt.datetime.now(dt.UTC).date().isoformat(),
