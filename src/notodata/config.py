@@ -161,6 +161,19 @@ class ClientBuildConfig:
 
 
 @dataclass(frozen=True)
+class DinoV2Config:
+    """The `dinov2_vits14` encoder: model and preprocessing, which fix the cache key."""
+
+    timm_name: str
+    """Pretrained weights come from the Hugging Face hub through timm."""
+    input_px: int
+    interpolation: str
+    """A PIL resampling filter name."""
+    mean: tuple[float, float, float]
+    std: tuple[float, float, float]
+
+
+@dataclass(frozen=True)
 class D1TestStub:
     """The exact arithmetic the brief's D1 regression test stub must use."""
 
@@ -190,6 +203,7 @@ class Config:
     folds: FoldConfig
     clients: ClientBuildConfig
     test_seeds: tuple[int, ...]
+    dinov2: DinoV2Config
     d1_test_stub: D1TestStub
 
 
@@ -269,5 +283,12 @@ CONFIG = Config(
         calibration_share=0.20,
     ),
     test_seeds=(1000, 1001, 1002, 1003, 1004),
+    dinov2=DinoV2Config(
+        timm_name="vit_small_patch14_dinov2.lvd142m",
+        input_px=224,
+        interpolation="bicubic",
+        mean=(0.485, 0.456, 0.406),
+        std=(0.229, 0.224, 0.225),
+    ),
     d1_test_stub=D1TestStub(mod_u=251, mod_v=241, channel_b=0, n_points=1000, seed=0),
 )

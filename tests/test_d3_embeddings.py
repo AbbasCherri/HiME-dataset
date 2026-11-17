@@ -156,6 +156,63 @@ def test_real_encoders_are_registered_stubs():
         assert spec.licence_note
     assert isinstance(embeddings.get_encoder("mean_colour"), embeddings.MeanColourEncoder)
     with pytest.raises(NotImplementedError, match="Task 27"):
-        embeddings.get_encoder("dinov2_vits14")
+        embeddings.get_encoder("openclip_vitb32_laion2b")
     with pytest.raises(KeyError):
         embeddings.get_encoder("nope")
+
+
+# -- dinov2_vits14 (weights are never loaded here) ---------------------------
+
+
+def _fake_forward(x):
+    assert x.dtype == np.float32
+    return x.mean(axis=(2, 3)).repeat(128, axis=1)[:, :384]
+
+
+def test_dinov2_preprocess_resizes_and_normalises():
+    cfg = CONFIG.dinov2
+    batch = np.full((2, 40, 30, 3), 255, dtype=np.uint8)
+    batch[1] = 0
+    out = embeddings.dinov2_preprocess(batch)
+    assert out.dtype == np.float32
+    assert out.shape == (2, 3, cfg.input_px, cfg.input_px)
+    for c in range(3):
+        assert out[0, c] == pytest.approx((1.0 - cfg.mean[c]) / cfg.std[c], abs=1e-5)
+        assert out[1, c] == pytest.approx((0.0 - cfg.mean[c]) / cfg.std[c], abs=1e-5)
+
+
+def test_dinov2_embed_runs_the_forward_on_preprocessed_input():
+    enc = embeddings.DinoV2Encoder(forward=_fake_forward)
+    assert (enc.encoder_id, enc.dim, enc.deterministic) == ("dinov2_vits14", 384, False)
+    out = enc.embed(np.zeros((3, 16, 16, 3), dtype=np.uint8))
+    assert out.dtype == np.float32
+    assert out.shape == (3, 384)
+
+
+def test_dinov2_embed_rejects_a_wrong_output_width():
+    enc = embeddings.DinoV2Encoder(forward=lambda x: np.zeros((len(x), 5), dtype=np.float32))
+    with pytest.raises(ValueError, match="384"):
+        enc.embed(np.zeros((1, 16, 16, 3), dtype=np.uint8))
+
+
+def test_get_encoder_builds_dinov2_lazily():
+    enc = embeddings.get_encoder("dinov2_vits14")
+    assert isinstance(enc, embeddings.DinoV2Encoder)
+    with pytest.raises(NotImplementedError):
+        embeddings.get_encoder("resnet50.tv_in1k_v2")
+
+
+def test_dinov2_sidecar_records_model_and_preprocessing(index):
+    enc = embeddings.DinoV2Encoder(forward=_fake_forward)
+    assert _build(index, enc) is True
+    meta = json.loads(
+        cache.sidecar_path(embeddings.embedding_path(enc.encoder_id, LAYER)).read_text()
+    )
+    assert meta["deterministic"] is False
+    assert meta["encoder_model"] == CONFIG.dinov2.timm_name
+    assert meta["encoder_preprocessing"] == embeddings.dinov2_preprocessing_note()
+    assert "bicubic" in meta["encoder_preprocessing"]
+
+
+def test_registry_licence_note_for_dinov2_names_apache():
+    assert "Apache-2.0" in embeddings.REGISTRY["dinov2_vits14"].licence_note

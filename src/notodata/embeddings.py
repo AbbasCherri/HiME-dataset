@@ -8,18 +8,21 @@ The sidecar adds `chip_index_sha256` (a hash of the chip pixel hashes) and
 `deterministic` to the D3 keys, so changed chip pixels invalidate embeddings
 even when `PIPELINE_VERSION` did not move.
 
-Only `MeanColourEncoder` is built here. The four candidate encoders are
-registry entries without weights; building them is the optional Task 27.
+`MeanColourEncoder` and `DinoV2Encoder` are built. The other candidate encoders
+are registry entries without weights; building them is the optional Task 27.
+An encoder may carry `sidecar_meta` (a dict), merged into the sidecar so that its
+model and preprocessing take part in the cache key.
 """
 
 from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
-from typing import Protocol
+from typing import Any, Protocol
 
 import numpy as np
 import pandas as pd
@@ -61,6 +64,66 @@ class MeanColourEncoder:
         return mean.astype(np.float32)
 
 
+def dinov2_preprocessing_note() -> str:
+    cfg = CONFIG.dinov2
+    return (
+        f"resize {cfg.input_px}x{cfg.input_px} {cfg.interpolation} (PIL, uint8), /255, "
+        f"mean {list(cfg.mean)}, std {list(cfg.std)}, NCHW; no L2 normalisation"
+    )
+
+
+def dinov2_preprocess(batch_uint8: np.ndarray) -> np.ndarray:
+    """`uint8[B, H, W, 3]` to `float32[B, 3, px, px]`, ImageNet-normalised."""
+    cfg = CONFIG.dinov2
+    resample = getattr(Image.Resampling, cfg.interpolation.upper())
+    size = (cfg.input_px, cfg.input_px)
+    resized = np.stack([np.asarray(Image.fromarray(a).resize(size, resample)) for a in batch_uint8])
+    scaled = resized.astype(np.float32) / 255.0
+    mean = np.asarray(cfg.mean, dtype=np.float32)
+    std = np.asarray(cfg.std, dtype=np.float32)
+    return np.ascontiguousarray(((scaled - mean) / std).transpose(0, 3, 1, 2))
+
+
+def _timm_dinov2_forward() -> Callable[[np.ndarray], np.ndarray]:
+    """Load the pretrained timm model; torch and timm are imported only here."""
+    import timm
+    import torch
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = timm.create_model(CONFIG.dinov2.timm_name, pretrained=True, num_classes=0)
+    model = model.eval().to(device)
+
+    def forward(x: np.ndarray) -> np.ndarray:
+        with torch.inference_mode():
+            return model(torch.from_numpy(x).to(device)).float().cpu().numpy()
+
+    return forward
+
+
+class DinoV2Encoder:
+    """DINOv2 ViT-S/14 pooled features through timm; weights load on first `embed`."""
+
+    encoder_id = "dinov2_vits14"
+    dim = 384
+    deterministic = False
+
+    def __init__(self, forward: Callable[[np.ndarray], np.ndarray] | None = None) -> None:
+        """`forward` maps `float32[B, 3, px, px]` to `[B, dim]`; tests inject a fake."""
+        self._forward = forward
+        self.sidecar_meta: dict[str, Any] = {
+            "encoder_model": CONFIG.dinov2.timm_name,
+            "encoder_preprocessing": dinov2_preprocessing_note(),
+        }
+
+    def embed(self, batch_uint8: np.ndarray) -> np.ndarray:
+        if self._forward is None:
+            self._forward = _timm_dinov2_forward()
+        out = np.asarray(self._forward(dinov2_preprocess(batch_uint8)), dtype=np.float32)
+        if out.shape != (len(batch_uint8), self.dim):
+            raise ValueError(f"expected features of width {self.dim}, got {out.shape}")
+        return out
+
+
 @dataclass(frozen=True)
 class EncoderSpec:
     encoder_id: str
@@ -77,7 +140,11 @@ REGISTRY: dict[str, EncoderSpec] = {
             2048,
             "torchvision/timm weights; licence to be verified in Task 27",
         ),
-        EncoderSpec("dinov2_vits14", 384, "Meta DINOv2 weights; licence to be verified in Task 27"),
+        EncoderSpec(
+            "dinov2_vits14",
+            384,
+            "DINOv2 weights are Apache-2.0 via timm/HF; to be re-checked at release",
+        ),
         EncoderSpec(
             "openclip_vitb32_laion2b",
             512,
@@ -98,6 +165,8 @@ def get_encoder(encoder_id: str) -> Encoder:
         raise KeyError(f"unknown encoder {encoder_id!r}; registered: {sorted(REGISTRY)}")
     if encoder_id == MeanColourEncoder.encoder_id:
         return MeanColourEncoder()
+    if encoder_id == DinoV2Encoder.encoder_id:
+        return DinoV2Encoder()
     raise NotImplementedError(f"{encoder_id}: real encoders are built in Task 27 (needs [embed])")
 
 
@@ -156,6 +225,7 @@ def ensure_embeddings(
     )
     meta["chip_index_sha256"] = chip_index_sha256(index)
     meta["deterministic"] = bool(encoder.deterministic)
+    meta.update(getattr(encoder, "sidecar_meta", {}))
 
     if not ids_file.exists():
         # the sidecar vouches for both files; without the ids it vouches for nothing
