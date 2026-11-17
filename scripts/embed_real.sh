@@ -4,6 +4,7 @@
 # Stops at the first failing step and prints which one. Log: reports/embed_real.log
 set -u -o pipefail
 log=reports/embed_real.log
+mkdir -p reports
 : > "$log"
 
 run() {
@@ -18,5 +19,9 @@ run() {
 
 run uv sync --frozen --extra embed
 run uv run python -c 'import torch;print(torch.cuda.is_available())'
+if ! tail -n 1 "$log" | grep -qx True; then
+  echo "ERROR: torch.cuda.is_available() is False; embeddings must be built on the GPU" | tee -a "$log"
+  exit 1
+fi
 run uv run python -m notodata embed --encoder dinov2_vits14
 echo "ALL STEPS PASSED" | tee -a "$log"

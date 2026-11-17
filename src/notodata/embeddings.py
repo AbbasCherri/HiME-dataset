@@ -11,7 +11,9 @@ even when `PIPELINE_VERSION` did not move.
 `MeanColourEncoder` and `DinoV2Encoder` are built. The other candidate encoders
 are registry entries without weights; building them is the optional Task 27.
 An encoder may carry `sidecar_meta` (a dict), merged into the sidecar so that its
-model and preprocessing take part in the cache key.
+model and preprocessing take part in the cache key. An encoder may also carry
+`provenance` (library versions, known once the model has run); `ensure_embeddings`
+writes it to `<layer>.provenance.json`, outside the cache key.
 """
 
 from __future__ import annotations
@@ -67,6 +69,7 @@ class MeanColourEncoder:
 def dinov2_preprocessing_note() -> str:
     cfg = CONFIG.dinov2
     return (
+        f"timm img_size={cfg.input_px}, "
         f"resize {cfg.input_px}x{cfg.input_px} {cfg.interpolation} (PIL, uint8), /255, "
         f"mean {list(cfg.mean)}, std {list(cfg.std)}, NCHW; no L2 normalisation"
     )
@@ -84,20 +87,25 @@ def dinov2_preprocess(batch_uint8: np.ndarray) -> np.ndarray:
     return np.ascontiguousarray(((scaled - mean) / std).transpose(0, 3, 1, 2))
 
 
-def _timm_dinov2_forward() -> Callable[[np.ndarray], np.ndarray]:
+def dinov2_create_kwargs() -> dict[str, Any]:
+    """`img_size` makes timm resample the position embedding; the default 518 would reject 224."""
+    return {"pretrained": True, "num_classes": 0, "img_size": CONFIG.dinov2.input_px}
+
+
+def _timm_dinov2_forward() -> tuple[Callable[[np.ndarray], np.ndarray], dict[str, str]]:
     """Load the pretrained timm model; torch and timm are imported only here."""
     import timm
     import torch
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = timm.create_model(CONFIG.dinov2.timm_name, pretrained=True, num_classes=0)
+    model = timm.create_model(CONFIG.dinov2.timm_name, **dinov2_create_kwargs())
     model = model.eval().to(device)
 
     def forward(x: np.ndarray) -> np.ndarray:
         with torch.inference_mode():
             return model(torch.from_numpy(x).to(device)).float().cpu().numpy()
 
-    return forward
+    return forward, {"timm": timm.__version__, "torch": torch.__version__}
 
 
 class DinoV2Encoder:
@@ -110,6 +118,8 @@ class DinoV2Encoder:
     def __init__(self, forward: Callable[[np.ndarray], np.ndarray] | None = None) -> None:
         """`forward` maps `float32[B, 3, px, px]` to `[B, dim]`; tests inject a fake."""
         self._forward = forward
+        self.provenance: dict[str, str] = {}
+        """Library versions, set when the real model loads; kept out of the cache key."""
         self.sidecar_meta: dict[str, Any] = {
             "encoder_model": CONFIG.dinov2.timm_name,
             "encoder_preprocessing": dinov2_preprocessing_note(),
@@ -117,7 +127,7 @@ class DinoV2Encoder:
 
     def embed(self, batch_uint8: np.ndarray) -> np.ndarray:
         if self._forward is None:
-            self._forward = _timm_dinov2_forward()
+            self._forward, self.provenance = _timm_dinov2_forward()
         out = np.asarray(self._forward(dinov2_preprocess(batch_uint8)), dtype=np.float32)
         if out.shape != (len(batch_uint8), self.dim):
             raise ValueError(f"expected features of width {self.dim}, got {out.shape}")
@@ -181,6 +191,10 @@ def ids_path(encoder_id: str, layer_id: str) -> Path:
     return paths.embeddings_dir(encoder_id) / f"{layer_id}.ids.npy"
 
 
+def provenance_path(encoder_id: str, layer_id: str) -> Path:
+    return paths.embeddings_dir(encoder_id) / f"{layer_id}.provenance.json"
+
+
 def _npy_bytes(array: np.ndarray) -> bytes:
     buf = BytesIO()
     np.save(buf, array, allow_pickle=False)
@@ -241,6 +255,10 @@ def ensure_embeddings(
         ids = ok["building_id"].to_numpy(dtype=np.int64)
         atomic_write(ids_file, _npy_bytes(ids))
         atomic_write(p, _npy_bytes(out))
+        versions = getattr(encoder, "provenance", {})
+        if versions:
+            blob = json.dumps(versions, indent=2, sort_keys=True) + "\n"
+            atomic_write(provenance_path(encoder.encoder_id, layer_id), blob.encode())
 
     return cache.ensure(path, meta, compute)
 

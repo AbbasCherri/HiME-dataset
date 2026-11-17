@@ -1,4 +1,6 @@
 import json
+import subprocess
+import sys
 
 import numpy as np
 import pandas as pd
@@ -171,14 +173,60 @@ def _fake_forward(x):
 
 def test_dinov2_preprocess_resizes_and_normalises():
     cfg = CONFIG.dinov2
-    batch = np.full((2, 40, 30, 3), 255, dtype=np.uint8)
-    batch[1] = 0
+    rng = np.random.default_rng(3)
+    batch = rng.integers(0, 256, size=(2, 40, 30, 3), dtype=np.uint8)
+    batch[0, :, :, 0] = np.arange(30, dtype=np.uint8) * 8  # R rises along x only
+    batch[0, :, :, 1] = (np.arange(40, dtype=np.uint8) * 6)[:, None]  # G rises along y only
     out = embeddings.dinov2_preprocess(batch)
     assert out.dtype == np.float32
     assert out.shape == (2, 3, cfg.input_px, cfg.input_px)
-    for c in range(3):
-        assert out[0, c] == pytest.approx((1.0 - cfg.mean[c]) / cfg.std[c], abs=1e-5)
-        assert out[1, c] == pytest.approx((0.0 - cfg.mean[c]) / cfg.std[c], abs=1e-5)
+    mean = np.asarray(cfg.mean, dtype=np.float32)[:, None, None]
+    std = np.asarray(cfg.std, dtype=np.float32)[:, None, None]
+    raw = out * std + mean  # back to [0, 1] per channel, NCHW
+    resample = getattr(Image.Resampling, cfg.interpolation.upper())
+    for i in range(2):
+        want = np.asarray(Image.fromarray(batch[i]).resize((cfg.input_px,) * 2, resample))
+        assert raw[i] * 255.0 == pytest.approx(want.transpose(2, 0, 1), abs=1e-3)
+    # R varies along x (last axis) and not along y; G the other way round
+    assert raw[0, 0, 0, -1] > raw[0, 0, 0, 0] + 0.5
+    assert raw[0, 0, -1, 0] == pytest.approx(raw[0, 0, 0, 0], abs=1e-3)
+    assert raw[0, 1, -1, 0] > raw[0, 1, 0, 0] + 0.5
+    assert raw[0, 1, 0, -1] == pytest.approx(raw[0, 1, 0, 0], abs=1e-3)
+
+
+def test_dinov2_create_kwargs_pin_the_input_size():
+    kw = embeddings.dinov2_create_kwargs()
+    assert kw == {"pretrained": True, "num_classes": 0, "img_size": CONFIG.dinov2.input_px}
+    assert f"img_size={CONFIG.dinov2.input_px}" in embeddings.dinov2_preprocessing_note()
+
+
+def test_importing_embeddings_does_not_import_torch_or_timm():
+    code = "import sys, notodata.embeddings; assert not {'torch', 'timm'} & set(sys.modules)"
+    done = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+    assert done.returncode == 0, done.stderr
+
+
+@pytest.mark.parametrize("key", ["encoder_model", "encoder_preprocessing"])
+def test_dinov2_model_or_preprocessing_change_recomputes(index, key):
+    enc = embeddings.DinoV2Encoder(forward=_fake_forward)
+    assert _build(index, enc) is True
+    assert _build(index, embeddings.DinoV2Encoder(forward=_fake_forward)) is False
+    changed = embeddings.DinoV2Encoder(forward=_fake_forward)
+    changed.sidecar_meta[key] += " (changed)"
+    assert _build(index, changed) is True
+
+
+def test_provenance_is_written_outside_the_cache_key(index):
+    enc = embeddings.DinoV2Encoder(forward=_fake_forward)
+    enc.provenance = {"timm": "1.0", "torch": "2.4"}
+    assert _build(index, enc) is True
+    side = embeddings.provenance_path(enc.encoder_id, LAYER)
+    assert json.loads(side.read_text()) == {"timm": "1.0", "torch": "2.4"}
+    meta = cache.sidecar_path(embeddings.embedding_path(enc.encoder_id, LAYER)).read_text()
+    assert "2.4" not in meta
+    other = embeddings.DinoV2Encoder(forward=_fake_forward)
+    other.provenance = {"timm": "9", "torch": "9"}
+    assert _build(index, other) is False
 
 
 def test_dinov2_embed_runs_the_forward_on_preprocessed_input():
