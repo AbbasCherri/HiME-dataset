@@ -816,14 +816,18 @@ def _rebuild_plan(entries: dict[str, str], layers: list[str]) -> list[list[str]]
     return plan
 
 
-def _stage_verify_inputs(ctx: Context, tmp: Path, reuse_tiles: bool) -> tuple[Path, Path]:
+def _stage_verify_inputs(ctx: Context, tmp: Path, reuse_tiles: bool,
+                         layers: list[str]) -> tuple[Path, Path]:  # fmt: skip
     from notodata import paths
 
     home, root = tmp / "home", tmp / "root"
     home.mkdir()
     shutil.copytree(paths.raw_dir(), home / "raw")
-    if reuse_tiles and (paths.notodata_home() / "tiles").is_dir():
-        shutil.copytree(paths.notodata_home() / "tiles", home / "tiles")
+    # only the layers the rebuild reads: the rest can be tens of GB
+    for layer in layers if reuse_tiles else []:
+        source = paths.notodata_home() / "tiles" / layer
+        if source.is_dir():
+            shutil.copytree(source, home / "tiles" / layer)
     shutil.copytree(ctx.reports(), root / "reports")
     return home, root
 
@@ -869,7 +873,7 @@ def _rebuild(ctx: Context, entries: dict[str, str], layers: list[str], clean: bo
 
     original = paths.notodata_home()
     with tempfile.TemporaryDirectory(dir=os.environ.get("VERIFY_HOME")) as tmp_name:
-        home, root = _stage_verify_inputs(ctx, Path(tmp_name), not clean)
+        home, root = _stage_verify_inputs(ctx, Path(tmp_name), not clean, chip_layers or layers)
         sub = Context(get=ctx.get, fetcher_factory=ctx.fetcher_factory,
                       gpkg_md5=ctx.gpkg_md5, root=root)  # fmt: skip
         with _Swapped(home):

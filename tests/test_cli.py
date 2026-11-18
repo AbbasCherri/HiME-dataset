@@ -282,3 +282,18 @@ def test_fetch_layer_shows_progress_and_still_fetches_every_tile(monkeypatch, ca
     cli._fetch_layer(Ctx(), "layer_x", [(1, 2), (3, 4), (5, 6)])
     assert [t[0] for t in seen] == ["layer_x"] * 3
     assert "3/3" in capsys.readouterr().err
+
+
+def test_verify_staging_copies_only_the_tiles_of_the_layers_it_rebuilds(env, tmp_path):
+    for layer in ("wanted", "other"):
+        tile = paths.notodata_home() / "tiles" / layer / "18" / "1" / "2.png"
+        tile.parent.mkdir(parents=True)
+        tile.write_bytes(b"x")
+    paths.raw_dir().mkdir(parents=True, exist_ok=True)
+    (env.root / "reports").mkdir(exist_ok=True)
+    stage = tmp_path / "stage"
+    stage.mkdir()
+    ctx = cli.Context(root=env.root)
+    home, _ = cli._stage_verify_inputs(ctx, stage, True, ["wanted"])
+    assert (home / "tiles" / "wanted" / "18" / "1" / "2.png").exists()
+    assert not (home / "tiles" / "other").exists()
