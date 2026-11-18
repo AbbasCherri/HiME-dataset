@@ -444,14 +444,19 @@ def unique_tiles(buildings) -> list[tuple[int, int]]:
 
 
 def _fetch_layer(ctx: Context, layer_id: str, wanted: list[tuple[int, int]]) -> None:
+    from tqdm import tqdm
+
     from notodata.config import CONFIG
 
     fetcher = _fetcher(ctx, layer_id)
     ids = [(layer_id, CONFIG.tile_chip.zoom, x, y) for x, y in wanted]
+    # Forced on (disable=False): `run_all.sh` pipes through tee, which would hide a default bar.
+    # The bar counts ids handed to the workers, which runs a little ahead of finished tiles.
+    progress = tqdm(ids, desc=layer_id, unit="tile", mininterval=10, disable=False)
     if hasattr(fetcher, "prefetch_many"):
-        fetcher.prefetch_many(ids)
+        fetcher.prefetch_many(progress)
     else:
-        for tile_id in ids:
+        for tile_id in progress:
             fetcher.get(*tile_id)
     ctx.record("fetch", layer_id=layer_id, tiles=len(wanted), recomputed=True,
                inputs={}, outputs={}, cache_key={})  # fmt: skip

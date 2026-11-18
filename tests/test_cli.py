@@ -261,3 +261,24 @@ def test_verify_rebuild_chips_unavailable_pre_layer():
     assert _chip_layers(decision) == ["post", "pre"]
     no_pre = {"post_layer": "post", "pre_layer": None, "pre_available": False}
     assert _chip_layers(no_pre) == ["post"]
+
+
+def test_fetch_layer_shows_progress_and_still_fetches_every_tile(monkeypatch, capsys):
+    """tqdm wraps the id list on stderr (forced on, since `run_all.sh` pipes through tee)."""
+    from notodata import cli
+
+    seen: list[tuple] = []
+
+    class Stub:
+        def prefetch_many(self, ids):
+            seen.extend(ids)
+            return len(seen)
+
+    class Ctx:
+        def record(self, *a, **k):
+            pass
+
+    monkeypatch.setattr(cli, "_fetcher", lambda ctx, layer_id: Stub())
+    cli._fetch_layer(Ctx(), "layer_x", [(1, 2), (3, 4), (5, 6)])
+    assert [t[0] for t in seen] == ["layer_x"] * 3
+    assert "3/3" in capsys.readouterr().err

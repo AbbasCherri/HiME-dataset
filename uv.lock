@@ -600,6 +600,7 @@ dependencies = [
     { name = "requests" },
     { name = "scikit-learn" },
     { name = "scipy" },
+    { name = "tqdm" },
 ]
 
 [package.optional-dependencies]
@@ -633,6 +634,7 @@ requires-dist = [
     { name = "scipy", specifier = ">=1.14" },
     { name = "timm", marker = "extra == 'embed'", specifier = ">=1.0" },
     { name = "torch", marker = "extra == 'embed'", specifier = ">=2.4" },
+    { name = "tqdm", specifier = ">=4.66" },
 ]
 provides-extras = ["embed"]
 
