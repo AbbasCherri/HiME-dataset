@@ -23,6 +23,9 @@ step() {
 }
 
 step "1/4 setup"                 bash scripts/setup_wsl.sh --allow-empty-data
+# verify rebuilds in a scratch dir; /tmp is RAM-backed on WSL, so keep it on the disk
+export VERIFY_HOME="${VERIFY_HOME:-$PWD/data/verify_tmp}"
+mkdir -p "$VERIFY_HOME"
 export UV_NO_SYNC=1              # keep the embed extra installed; uv run must not re-sync
 # source, labels, geometry, fetch, chips, coverage, imagery..clients, table, manifest, report.
 # Every stage skips finished work, so an empty data/ means a full fresh build (fetch takes hours).
