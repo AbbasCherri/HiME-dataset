@@ -114,8 +114,14 @@ def gate(root: Path) -> tuple[str, str] | None:
         return "missing", f"{result} is missing; {hint}"
     if not manifest.exists():
         return "missing", f"{manifest} is missing; run `notodata manifest`, then verify"
-    if json.loads(result.read_text()).get("status") != "pass":
+    try:
+        status = json.loads(result.read_text()).get("status")
+    except (ValueError, AttributeError):
+        return "failed", f"{result} is not a verify result; {hint}"
+    if status != "pass":
         return "failed", f"{result} does not say pass; {hint}"
+    if result.stat().st_mtime < manifest.stat().st_mtime:
+        return "failed", f"{result} is older than {manifest}; {hint}"
     return None
 
 

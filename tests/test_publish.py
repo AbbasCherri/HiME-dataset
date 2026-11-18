@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 
 import pytest
 import yaml
@@ -35,6 +36,11 @@ class FakeApi:
         return {op.path_in_repo for kw in self.named("create_commit") for op in kw["operations"]}
 
 
+def _newer_than(path, other, seconds=10):
+    mtime = other.stat().st_mtime + seconds
+    os.utime(path, (mtime, mtime))
+
+
 def _touch(path, text="x"):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text)
@@ -53,6 +59,7 @@ def release(tmp_home, tmp_path):
     _touch(reports / "audit" / "key.csv", "secret")
     _touch(root / "MANIFEST.sha256", "0" * 64 + "  derived/buildings.parquet\n")
     _touch(root / "DATASET.md", "# Noto\n\nbody text\n")
+    _newer_than(reports / "verify_result.json", root / "MANIFEST.sha256")
     for rel in (
         "derived/buildings.parquet",
         "derived/folds.parquet",
@@ -250,3 +257,24 @@ def test_card_is_uploaded_as_readme_with_the_card_text(release, token):
     assert run(ctx, "--yes") == cli.EXIT_OK
     ops = {op.path_in_repo: op for kw in api.named("create_commit") for op in kw["operations"]}
     assert ops["README.md"].path_or_fileobj == publish.build_card(root).encode()
+
+
+def test_refuses_stale_verify_result(release, capsys):
+    """A pass recorded before the manifest was rewritten says nothing about this dataset."""
+    ctx, api, root = release
+    manifest = root / "MANIFEST.sha256"
+    _newer_than(manifest, root / "reports" / "verify_result.json")
+    assert run(ctx, "--yes") == cli.EXIT_VERIFY_FAILED
+    assert "older than" in capsys.readouterr().err
+    assert api.calls == []
+
+
+@pytest.mark.parametrize("text", ["not json", "[1, 2]", "null"])
+def test_refuses_malformed_verify_result(release, capsys, text):
+    ctx, api, root = release
+    result = root / "reports" / "verify_result.json"
+    result.write_text(text)
+    _newer_than(result, root / "MANIFEST.sha256")
+    assert run(ctx, "--yes") == cli.EXIT_VERIFY_FAILED
+    assert "verify" in capsys.readouterr().err
+    assert api.calls == []

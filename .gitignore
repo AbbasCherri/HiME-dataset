@@ -11,3 +11,6 @@ __pycache__/
 # then added explicitly once sign-off lands in the same commit.
 reports/audit/key.csv
 data/audit/key.csv
+
+# run logs from scripts/*.sh
+reports/*.log
