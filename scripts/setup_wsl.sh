@@ -45,6 +45,19 @@ fi
 uv run --no-sync python -c 'import torch,sys; print("torch", torch.__version__, "cuda", torch.cuda.is_available()); sys.exit(0 if torch.cuda.is_available() else 3)' \
   && ok "torch sees the GPU" || echo "WARNING: torch cannot use CUDA yet"
 
+# raw source: the Zenodo ESSD gpkg, checked against the pinned MD5
+gpkg=data/raw/Noto_Peninsula_Damage_2_5.gpkg
+gpkg_md5=280e9c53cb45086786c20ed0b2c21ffb
+if [ ! -f "$gpkg" ]; then
+  mkdir -p data/raw
+  echo "downloading $(basename "$gpkg") from Zenodo"
+  curl -L --fail -o "$gpkg" "https://zenodo.org/records/15192949/files/Noto_Peninsula_Damage_2_5.gpkg?download=1" \
+    || { rm -f "$gpkg"; fail "gpkg download failed"; }
+  got=$(md5sum "$gpkg" | cut -d' ' -f1)
+  [ "$got" = "$gpkg_md5" ] || { rm -f "$gpkg"; fail "gpkg MD5 mismatch (got $got, expected $gpkg_md5); bad file deleted, re-run"; }
+fi
+ok "gpkg present"
+
 # data: either copied from the first machine, or absent (then `build` fetches everything)
 home="${NOTODATA_HOME:-./data}"
 if [ -d "$home/tiles" ] && [ -d "$home/chips" ]; then

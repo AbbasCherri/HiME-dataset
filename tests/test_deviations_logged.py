@@ -31,6 +31,8 @@ _REQUIRED_SNIPPETS = [
     "openclip_vitb32_laion2b",
     "satlas_aerial_swinb_si",  # candidate encoders
     "2026-10-23",
+    config.HF_DATASET_REPO_ID,  # the published dataset repo, created private
+    "cc-by-4.0",  # dataset card licence
 ]
 
 

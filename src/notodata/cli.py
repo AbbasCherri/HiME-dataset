@@ -13,6 +13,8 @@ when it still matches; report-only stages rewrite their file only if the
 bytes change. Every stage appends one JSON line to
 `<NOTODATA_HOME>/logs/run_<utc>.jsonl`. Exit codes: 0 ok, 1 verify failed,
 2 an input is missing, 3 the A1 pre layer was rejected (re-audit needed).
+`publish` also returns 2 when `reports/verify_result.json` or `MANIFEST.sha256` is absent or
+`HF_TOKEN` is unset on a real upload, and 1 when the verify result is not "pass".
 """
 
 from __future__ import annotations
@@ -118,6 +120,8 @@ class Context:
     """`layer -> TileFetcher` (default: `HttpTileFetcher`)."""
     gpkg_md5: str | None = None
     """Expected MD5 of the gpkg (default: the pinned value in config)."""
+    hf_api_factory: Callable | None = None
+    """`() -> HfApi` for `publish` (default: `publish.default_api`)."""
     root: Path = field(default_factory=Path)
     """Repo root: holds `reports/`, `DATASET.md` and `MANIFEST.sha256`."""
     log: RunLog = field(default_factory=RunLog)
@@ -898,6 +902,52 @@ def stage_verify(ctx: Context, args) -> int:
     return EXIT_VERIFY_FAILED if problems else EXIT_OK
 
 
+# -- publish ----------------------------------------------------------------
+
+
+def _size(n: int) -> str:
+    return f"{n / 1e6:.2f} MB"
+
+
+def _print_plan(items: list, parts: list) -> None:
+    from notodata.config import HF_DATASET_REPO_ID
+
+    print(f"files for {HF_DATASET_REPO_ID}:")
+    for item in items:
+        print(f"  {item.rel}  {item.size} bytes")
+    for part in parts:
+        print(f"  {part.rel}/  {part.n_files} files, {part.size} bytes (uploaded as a folder)")
+    total = sum(i.size for i in items) + sum(p.size for p in parts)
+    print(f"total: {len(items)} files and {len(parts)} imagery folders, {_size(total)}")
+
+
+def stage_publish(ctx: Context, args) -> int:
+    from notodata import publish
+    from notodata.config import HF_DATASET_REPO_ID, HF_REPO_PRIVATE_ON_CREATE
+
+    blocked = publish.gate(ctx.root)
+    if blocked is not None:
+        print(f"error: {blocked[1]}", file=sys.stderr)
+        return EXIT_VERIFY_FAILED if blocked[0] == "failed" else EXIT_MISSING_INPUT
+    items = publish.plan(ctx.root)
+    parts = publish.imagery_parts(args.include_imagery)
+    _print_plan(items, parts)
+    if not args.yes:
+        print("dry run: nothing uploaded; pass --yes to upload")
+        ctx.record("publish", dry_run=True, files=len(items), recomputed=False,
+                   inputs={}, outputs={}, cache_key={})  # fmt: skip
+        return EXIT_OK
+    if not os.environ.get("HF_TOKEN"):
+        raise CliError("HF_TOKEN is not set; put it in .env or export it, then rerun with --yes")
+    publish.upload(ctx.root, items, bool(parts), ctx.hf_api_factory)
+    visibility = "private" if HF_REPO_PRIVATE_ON_CREATE else "public"
+    print(f"uploaded to https://huggingface.co/datasets/{HF_DATASET_REPO_ID}")
+    print(f"a repo created by this run is {visibility}; change visibility on the Hub")
+    ctx.record("publish", dry_run=False, files=len(items), recomputed=True,
+               inputs={}, outputs={}, cache_key={})  # fmt: skip
+    return EXIT_OK
+
+
 # -- build ------------------------------------------------------------------
 
 
@@ -957,6 +1007,7 @@ _STAGES = (
     ("manifest", stage_manifest, "write MANIFEST.sha256"),
     ("verify", stage_verify, "rebuild and compare with the manifest"),
     ("report", stage_report, "rewrite the AUTO blocks of DATASET.md"),
+    ("publish", stage_publish, "upload the verified dataset to Hugging Face (dry run by default)"),
     ("build", stage_build, "every stage except audit and embed"),
 )
 
@@ -979,6 +1030,10 @@ def _stage_options() -> dict[str, list[tuple[tuple[str, ...], dict]]]:
         "splits": [seeds],
         "clients": [seeds, (("--N",), {"type": int, "nargs": "+", "default": list(CLIENT_COUNTS)})],
         "embed": [(("--encoder",), {"required": True})],
+        "publish": [
+            (("--yes",), {"action": "store_true", "help": "really upload (default: dry run)"}),
+            (("--include-imagery",), {"action": "store_true", "help": "also chips/ and tiles/"}),
+        ],
         "verify": [
             (("--reuse-tiles",), {"action": "store_true", "help": "reuse the tile cache"}),
             (("--clean",), {"action": "store_true", "help": "re-fetch every tile"}),

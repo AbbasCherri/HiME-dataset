@@ -40,6 +40,19 @@ MAX_LABEL_CONFLICT_SHARE: float = 0.01
 """Abort the load if `damage_val` and `label` disagree on more than this share of rows."""
 
 
+HF_DATASET_REPO_ID: str = "AbbasABC/HiME-dataset"
+"""Hugging Face dataset repo `notodata publish` uploads to (DATASET.md deviation row 12)."""
+
+HF_REPO_PRIVATE_ON_CREATE: bool = True
+"""A repo `publish` creates starts private; visibility is flipped by hand on the Hub."""
+
+CARD_LICENCE: str = "cc-by-4.0"
+"""Licence in the dataset card's front matter."""
+
+CARD_PRETTY_NAME: str = "HiME Noto 2024 building collapse"
+"""`pretty_name` in the dataset card's front matter."""
+
+
 @dataclass(frozen=True)
 class BuildingSource:
     """Per-building labels and footprints: the Zenodo ESSD GeoPackage."""

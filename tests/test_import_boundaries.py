@@ -1,8 +1,9 @@
 """Import boundaries: each external dependency has one designated module.
 
 Only `tiles.py` may import `requests`; only `source.py` may import geopandas or
-pyogrio. Raw data never goes through the Hugging Face libraries (rulings P9-P12),
-so no module may import `huggingface_hub` or `datasets`.
+pyogrio. Raw data never goes through the Hugging Face libraries (rulings P9-P12), so
+no module may import `datasets`; only `publish.py` (the upload of the finished dataset)
+may import `huggingface_hub`.
 """
 
 import ast
@@ -14,7 +15,7 @@ _FORBIDDEN = {
     "requests": {"tiles.py"},
     "geopandas": {"source.py"},
     "pyogrio": {"source.py"},
-    "huggingface_hub": set(),
+    "huggingface_hub": {"publish.py"},
     "datasets": set(),
 }
 
