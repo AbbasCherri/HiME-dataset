@@ -374,188 +374,26 @@ L = `<km>` (rule case: `<first bin below 0.05 | clamped>`).
 | 1004 | val | 14344 | 693 | 10544 | 3107 |
 | 1004 | train_pool | 65877 | 1428 | 52585 | 11864 |
 | 1004 | buffer_dropped | 28521 | 648 | 23706 | 4167 |
-| 2000 | test | 14344 | 693 | 10544 | 3107 |
-| 2000 | val | 31466 | 692 | 24555 | 6219 |
-| 2000 | train_pool | 74265 | 1595 | 60483 | 12187 |
-| 2000 | buffer_dropped | 20133 | 481 | 16693 | 2959 |
-| 2001 | test | 31466 | 692 | 24555 | 6219 |
-| 2001 | val | 31466 | 692 | 25279 | 5495 |
-| 2001 | train_pool | 49825 | 1447 | 39926 | 8452 |
-| 2001 | buffer_dropped | 27451 | 630 | 22515 | 4306 |
-| 2002 | test | 31466 | 692 | 25279 | 5495 |
-| 2002 | val | 31466 | 692 | 26457 | 4317 |
-| 2002 | train_pool | 52908 | 1368 | 40087 | 11453 |
-| 2002 | buffer_dropped | 24368 | 709 | 20452 | 3207 |
-| 2003 | test | 31466 | 692 | 26457 | 4317 |
-| 2003 | val | 31466 | 692 | 25440 | 5334 |
-| 2003 | train_pool | 51546 | 1357 | 40446 | 9743 |
-| 2003 | buffer_dropped | 25730 | 720 | 19932 | 5078 |
-| 2004 | test | 31466 | 692 | 25440 | 5334 |
-| 2004 | val | 14344 | 693 | 10544 | 3107 |
-| 2004 | train_pool | 65877 | 1428 | 52585 | 11864 |
-| 2004 | buffer_dropped | 28521 | 648 | 23706 | 4167 |
-| 3000 | test | 14344 | 693 | 10544 | 3107 |
-| 3000 | val | 31466 | 692 | 24555 | 6219 |
-| 3000 | train_pool | 74265 | 1595 | 60483 | 12187 |
-| 3000 | buffer_dropped | 20133 | 481 | 16693 | 2959 |
-| 3001 | test | 31466 | 692 | 24555 | 6219 |
-| 3001 | val | 31466 | 692 | 25279 | 5495 |
-| 3001 | train_pool | 49825 | 1447 | 39926 | 8452 |
-| 3001 | buffer_dropped | 27451 | 630 | 22515 | 4306 |
-| 3002 | test | 31466 | 692 | 25279 | 5495 |
-| 3002 | val | 31466 | 692 | 26457 | 4317 |
-| 3002 | train_pool | 52908 | 1368 | 40087 | 11453 |
-| 3002 | buffer_dropped | 24368 | 709 | 20452 | 3207 |
-| 3003 | test | 31466 | 692 | 26457 | 4317 |
-| 3003 | val | 31466 | 692 | 25440 | 5334 |
-| 3003 | train_pool | 51546 | 1357 | 40446 | 9743 |
-| 3003 | buffer_dropped | 25730 | 720 | 19932 | 5078 |
-| 3004 | test | 31466 | 692 | 25440 | 5334 |
-| 3004 | val | 14344 | 693 | 10544 | 3107 |
-| 3004 | train_pool | 65877 | 1428 | 52585 | 11864 |
-| 3004 | buffer_dropped | 28521 | 648 | 23706 | 4167 |
-| 3005 | test | 14344 | 693 | 10544 | 3107 |
-| 3005 | val | 31466 | 692 | 24555 | 6219 |
-| 3005 | train_pool | 74265 | 1595 | 60483 | 12187 |
-| 3005 | buffer_dropped | 20133 | 481 | 16693 | 2959 |
-| 3006 | test | 31466 | 692 | 24555 | 6219 |
-| 3006 | val | 31466 | 692 | 25279 | 5495 |
-| 3006 | train_pool | 49825 | 1447 | 39926 | 8452 |
-| 3006 | buffer_dropped | 27451 | 630 | 22515 | 4306 |
-| 3007 | test | 31466 | 692 | 25279 | 5495 |
-| 3007 | val | 31466 | 692 | 26457 | 4317 |
-| 3007 | train_pool | 52908 | 1368 | 40087 | 11453 |
-| 3007 | buffer_dropped | 24368 | 709 | 20452 | 3207 |
-| 3008 | test | 31466 | 692 | 26457 | 4317 |
-| 3008 | val | 31466 | 692 | 25440 | 5334 |
-| 3008 | train_pool | 51546 | 1357 | 40446 | 9743 |
-| 3008 | buffer_dropped | 25730 | 720 | 19932 | 5078 |
-| 3009 | test | 31466 | 692 | 25440 | 5334 |
-| 3009 | val | 14344 | 693 | 10544 | 3107 |
-| 3009 | train_pool | 65877 | 1428 | 52585 | 11864 |
-| 3009 | buffer_dropped | 28521 | 648 | 23706 | 4167 |
-| 3010 | test | 14344 | 693 | 10544 | 3107 |
-| 3010 | val | 31466 | 692 | 24555 | 6219 |
-| 3010 | train_pool | 74265 | 1595 | 60483 | 12187 |
-| 3010 | buffer_dropped | 20133 | 481 | 16693 | 2959 |
-| 3011 | test | 31466 | 692 | 24555 | 6219 |
-| 3011 | val | 31466 | 692 | 25279 | 5495 |
-| 3011 | train_pool | 49825 | 1447 | 39926 | 8452 |
-| 3011 | buffer_dropped | 27451 | 630 | 22515 | 4306 |
-| 3012 | test | 31466 | 692 | 25279 | 5495 |
-| 3012 | val | 31466 | 692 | 26457 | 4317 |
-| 3012 | train_pool | 52908 | 1368 | 40087 | 11453 |
-| 3012 | buffer_dropped | 24368 | 709 | 20452 | 3207 |
-| 3013 | test | 31466 | 692 | 26457 | 4317 |
-| 3013 | val | 31466 | 692 | 25440 | 5334 |
-| 3013 | train_pool | 51546 | 1357 | 40446 | 9743 |
-| 3013 | buffer_dropped | 25730 | 720 | 19932 | 5078 |
-| 3014 | test | 31466 | 692 | 25440 | 5334 |
-| 3014 | val | 14344 | 693 | 10544 | 3107 |
-| 3014 | train_pool | 65877 | 1428 | 52585 | 11864 |
-| 3014 | buffer_dropped | 28521 | 648 | 23706 | 4167 |
-| 3015 | test | 14344 | 693 | 10544 | 3107 |
-| 3015 | val | 31466 | 692 | 24555 | 6219 |
-| 3015 | train_pool | 74265 | 1595 | 60483 | 12187 |
-| 3015 | buffer_dropped | 20133 | 481 | 16693 | 2959 |
-| 3016 | test | 31466 | 692 | 24555 | 6219 |
-| 3016 | val | 31466 | 692 | 25279 | 5495 |
-| 3016 | train_pool | 49825 | 1447 | 39926 | 8452 |
-| 3016 | buffer_dropped | 27451 | 630 | 22515 | 4306 |
-| 3017 | test | 31466 | 692 | 25279 | 5495 |
-| 3017 | val | 31466 | 692 | 26457 | 4317 |
-| 3017 | train_pool | 52908 | 1368 | 40087 | 11453 |
-| 3017 | buffer_dropped | 24368 | 709 | 20452 | 3207 |
-| 3018 | test | 31466 | 692 | 26457 | 4317 |
-| 3018 | val | 31466 | 692 | 25440 | 5334 |
-| 3018 | train_pool | 51546 | 1357 | 40446 | 9743 |
-| 3018 | buffer_dropped | 25730 | 720 | 19932 | 5078 |
-| 3019 | test | 31466 | 692 | 25440 | 5334 |
-| 3019 | val | 14344 | 693 | 10544 | 3107 |
-| 3019 | train_pool | 65877 | 1428 | 52585 | 11864 |
-| 3019 | buffer_dropped | 28521 | 648 | 23706 | 4167 |
-| 4000 | test | 14344 | 693 | 10544 | 3107 |
-| 4000 | val | 31466 | 692 | 24555 | 6219 |
-| 4000 | train_pool | 74265 | 1595 | 60483 | 12187 |
-| 4000 | buffer_dropped | 20133 | 481 | 16693 | 2959 |
-| 4001 | test | 31466 | 692 | 24555 | 6219 |
-| 4001 | val | 31466 | 692 | 25279 | 5495 |
-| 4001 | train_pool | 49825 | 1447 | 39926 | 8452 |
-| 4001 | buffer_dropped | 27451 | 630 | 22515 | 4306 |
-| 4002 | test | 31466 | 692 | 25279 | 5495 |
-| 4002 | val | 31466 | 692 | 26457 | 4317 |
-| 4002 | train_pool | 52908 | 1368 | 40087 | 11453 |
-| 4002 | buffer_dropped | 24368 | 709 | 20452 | 3207 |
-| 4003 | test | 31466 | 692 | 26457 | 4317 |
-| 4003 | val | 31466 | 692 | 25440 | 5334 |
-| 4003 | train_pool | 51546 | 1357 | 40446 | 9743 |
-| 4003 | buffer_dropped | 25730 | 720 | 19932 | 5078 |
-| 4004 | test | 31466 | 692 | 25440 | 5334 |
-| 4004 | val | 14344 | 693 | 10544 | 3107 |
-| 4004 | train_pool | 65877 | 1428 | 52585 | 11864 |
-| 4004 | buffer_dropped | 28521 | 648 | 23706 | 4167 |
-| 4005 | test | 14344 | 693 | 10544 | 3107 |
-| 4005 | val | 31466 | 692 | 24555 | 6219 |
-| 4005 | train_pool | 74265 | 1595 | 60483 | 12187 |
-| 4005 | buffer_dropped | 20133 | 481 | 16693 | 2959 |
-| 4006 | test | 31466 | 692 | 24555 | 6219 |
-| 4006 | val | 31466 | 692 | 25279 | 5495 |
-| 4006 | train_pool | 49825 | 1447 | 39926 | 8452 |
-| 4006 | buffer_dropped | 27451 | 630 | 22515 | 4306 |
-| 4007 | test | 31466 | 692 | 25279 | 5495 |
-| 4007 | val | 31466 | 692 | 26457 | 4317 |
-| 4007 | train_pool | 52908 | 1368 | 40087 | 11453 |
-| 4007 | buffer_dropped | 24368 | 709 | 20452 | 3207 |
-| 4008 | test | 31466 | 692 | 26457 | 4317 |
-| 4008 | val | 31466 | 692 | 25440 | 5334 |
-| 4008 | train_pool | 51546 | 1357 | 40446 | 9743 |
-| 4008 | buffer_dropped | 25730 | 720 | 19932 | 5078 |
-| 4009 | test | 31466 | 692 | 25440 | 5334 |
-| 4009 | val | 14344 | 693 | 10544 | 3107 |
-| 4009 | train_pool | 65877 | 1428 | 52585 | 11864 |
-| 4009 | buffer_dropped | 28521 | 648 | 23706 | 4167 |
-| 4010 | test | 14344 | 693 | 10544 | 3107 |
-| 4010 | val | 31466 | 692 | 24555 | 6219 |
-| 4010 | train_pool | 74265 | 1595 | 60483 | 12187 |
-| 4010 | buffer_dropped | 20133 | 481 | 16693 | 2959 |
-| 4011 | test | 31466 | 692 | 24555 | 6219 |
-| 4011 | val | 31466 | 692 | 25279 | 5495 |
-| 4011 | train_pool | 49825 | 1447 | 39926 | 8452 |
-| 4011 | buffer_dropped | 27451 | 630 | 22515 | 4306 |
-| 4012 | test | 31466 | 692 | 25279 | 5495 |
-| 4012 | val | 31466 | 692 | 26457 | 4317 |
-| 4012 | train_pool | 52908 | 1368 | 40087 | 11453 |
-| 4012 | buffer_dropped | 24368 | 709 | 20452 | 3207 |
-| 4013 | test | 31466 | 692 | 26457 | 4317 |
-| 4013 | val | 31466 | 692 | 25440 | 5334 |
-| 4013 | train_pool | 51546 | 1357 | 40446 | 9743 |
-| 4013 | buffer_dropped | 25730 | 720 | 19932 | 5078 |
-| 4014 | test | 31466 | 692 | 25440 | 5334 |
-| 4014 | val | 14344 | 693 | 10544 | 3107 |
-| 4014 | train_pool | 65877 | 1428 | 52585 | 11864 |
-| 4014 | buffer_dropped | 28521 | 648 | 23706 | 4167 |
-| 4015 | test | 14344 | 693 | 10544 | 3107 |
-| 4015 | val | 31466 | 692 | 24555 | 6219 |
-| 4015 | train_pool | 74265 | 1595 | 60483 | 12187 |
-| 4015 | buffer_dropped | 20133 | 481 | 16693 | 2959 |
-| 4016 | test | 31466 | 692 | 24555 | 6219 |
-| 4016 | val | 31466 | 692 | 25279 | 5495 |
-| 4016 | train_pool | 49825 | 1447 | 39926 | 8452 |
-| 4016 | buffer_dropped | 27451 | 630 | 22515 | 4306 |
-| 4017 | test | 31466 | 692 | 25279 | 5495 |
-| 4017 | val | 31466 | 692 | 26457 | 4317 |
-| 4017 | train_pool | 52908 | 1368 | 40087 | 11453 |
-| 4017 | buffer_dropped | 24368 | 709 | 20452 | 3207 |
-| 4018 | test | 31466 | 692 | 26457 | 4317 |
-| 4018 | val | 31466 | 692 | 25440 | 5334 |
-| 4018 | train_pool | 51546 | 1357 | 40446 | 9743 |
-| 4018 | buffer_dropped | 25730 | 720 | 19932 | 5078 |
-| 4019 | test | 31466 | 692 | 25440 | 5334 |
-| 4019 | val | 14344 | 693 | 10544 | 3107 |
-| 4019 | train_pool | 65877 | 1428 | 52585 | 11864 |
-| 4019 | buffer_dropped | 28521 | 648 | 23706 | 4167 |
 <!-- /AUTO -->
-<!-- AUTO:clients_summary --> per (N, seed) <!-- /AUTO -->
+<!-- AUTO:clients_summary -->
+| N | seed | clients_kept | clients_dropped | buildings_dropped | dropped_collapsed | dropped_survived | dropped_unlabelled | size_median | size_min | size_max | clients_zero_collapsed_calib |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 100 | 1000 | 100 | 0 | 0 | 0 | 0 | 0 | 566.0 | 113 | 3422 | 63 |
+| 100 | 1001 | 100 | 0 | 0 | 0 | 0 | 0 | 308.5 | 40 | 2995 | 69 |
+| 100 | 1002 | 100 | 0 | 0 | 0 | 0 | 0 | 317.0 | 25 | 4019 | 67 |
+| 100 | 1003 | 100 | 0 | 0 | 0 | 0 | 0 | 364.5 | 42 | 2686 | 67 |
+| 100 | 1004 | 100 | 0 | 0 | 0 | 0 | 0 | 469.5 | 105 | 3612 | 67 |
+| 200 | 1000 | 200 | 0 | 0 | 0 | 0 | 0 | 256.5 | 29 | 2078 | 148 |
+| 200 | 1001 | 197 | 3 | 45 | 0 | 35 | 10 | 162.0 | 20 | 1471 | 151 |
+| 200 | 1002 | 199 | 1 | 19 | 0 | 14 | 5 | 173.0 | 20 | 1556 | 153 |
+| 200 | 1003 | 195 | 5 | 56 | 0 | 25 | 31 | 194.0 | 22 | 1568 | 148 |
+| 200 | 1004 | 200 | 0 | 0 | 0 | 0 | 0 | 223.0 | 37 | 2105 | 156 |
+| 50 | 1000 | 50 | 0 | 0 | 0 | 0 | 0 | 1030.5 | 361 | 9204 | 20 |
+| 50 | 1001 | 50 | 0 | 0 | 0 | 0 | 0 | 648.0 | 153 | 4632 | 29 |
+| 50 | 1002 | 50 | 0 | 0 | 0 | 0 | 0 | 722.0 | 122 | 4074 | 23 |
+| 50 | 1003 | 50 | 0 | 0 | 0 | 0 | 0 | 619.5 | 147 | 4769 | 29 |
+| 50 | 1004 | 50 | 0 | 0 | 0 | 0 | 0 | 965.0 | 250 | 6280 | 23 |
+<!-- /AUTO -->
 
 ## 9. Statistics computed on all folds
 
@@ -574,6 +412,8 @@ Python 3.12, image base `python:3.12-slim-bookworm`
 thread settings (`OMP_NUM_THREADS`, `MKL_NUM_THREADS`, `OPENBLAS_NUM_THREADS`
 all 1), <!-- AUTO:pip_freeze -->
 ```
+Jinja2==3.1.6
+MarkupSafe==3.0.4
 PyYAML==6.0.3
 Pygments==2.21.0
 aiohappyeyeballs==2.7.1
@@ -586,11 +426,15 @@ charset-normalizer==3.5.2
 click==8.5.0
 cloudpickle==3.1.2
 complexipy==8.1.0
+cuda-bindings==13.4.4
+cuda-pathfinder==1.8.4
+cuda-toolkit==13.0.3.0
 datasets==5.1.0
 dill==0.4.1
 filelock==4.2.4
 frozenlist==1.8.0
 fsspec==2026.7.0
+ftfy==6.3.1
 geopandas==1.2.0
 h11==0.16.0
 hf-xet==1.7.0
@@ -600,10 +444,29 @@ huggingface_hub==2.2.0
 idna==3.20
 iniconfig==2.3.1
 joblib==1.6.0
+mpmath==1.3.0
 multidict==7.1.0
 multiprocess==0.70.19
 narwhals==2.27.1
+networkx==3.7
+notodata==0.1.0
 numpy==2.5.4
+nvidia-cublas==13.1.1.3
+nvidia-cuda-cupti==13.0.85
+nvidia-cuda-nvrtc==13.0.88
+nvidia-cuda-runtime==13.0.96
+nvidia-cudnn-cu13==9.24.0.43
+nvidia-cufft==12.0.0.61
+nvidia-cufile==1.15.1.6
+nvidia-curand==10.4.0.35
+nvidia-cusolver==12.0.4.66
+nvidia-cusparse==12.6.3.3
+nvidia-cusparselt-cu13==0.8.1
+nvidia-nccl-cu13==2.30.7
+nvidia-nvjitlink==13.4.92
+nvidia-nvshmem-cu13==3.4.5
+nvidia-nvtx==13.0.85
+open_clip_torch==3.3.0
 packaging==26.3
 pandas==3.1.0
 pillow==13.0.0
@@ -614,18 +477,27 @@ pyogrio==0.13.0
 pyproj==3.8.0
 pytest==9.1.1
 python-dateutil==3.0.0
+regex==2026.9.29
 requests==2.34.2
 ruff==0.17.2
+safetensors==0.8.0
 scikit-learn==1.9.1
 scipy==1.18.1
+setuptools==84.2.1
 shapely==2.2.0
 six==1.17.0
+sympy==1.14.0
 threadpoolctl==3.7.0
+timm==1.0.30
+torch==2.14.1
+torchvision==0.29.1
 tqdm==4.70.1
+triton==3.8.0
 truststore==0.10.5
 typing_extensions==4.16.0
 tzdata==2026.5
 urllib3==2.8.0
+wcwidth==0.9.3
 xxhash==4.0.2
 yarl==1.25.1
 ```
@@ -634,7 +506,63 @@ yarl==1.25.1
 Default seeds: 1000, 1001, 1002, 1003, 1004. Folds: 5; audit seed 0.
 <!-- /AUTO -->
 How to rebuild: `make build`; how to verify: `notodata verify --clean`.
-<!-- AUTO:verify_result --> date, mode, pass or fail per file <!-- /AUTO -->
+<!-- AUTO:verify_result -->
+2026-11-18, mode `reuse-tiles`: **fail**
+
+| file | result |
+| --- | --- |
+| chips/seamlessphoto/@tree | pass |
+| chips/seamlessphoto/index.parquet | pass |
+| derived/buildings.parquet | pass |
+| derived/clients/N100_seed_1000.parquet | pass |
+| derived/clients/N100_seed_1000_meta.parquet | pass |
+| derived/clients/N100_seed_1001.parquet | pass |
+| derived/clients/N100_seed_1001_meta.parquet | pass |
+| derived/clients/N100_seed_1002.parquet | pass |
+| derived/clients/N100_seed_1002_meta.parquet | pass |
+| derived/clients/N100_seed_1003.parquet | pass |
+| derived/clients/N100_seed_1003_meta.parquet | pass |
+| derived/clients/N100_seed_1004.parquet | pass |
+| derived/clients/N100_seed_1004_meta.parquet | pass |
+| derived/clients/N200_seed_1000.parquet | pass |
+| derived/clients/N200_seed_1000_meta.parquet | pass |
+| derived/clients/N200_seed_1001.parquet | pass |
+| derived/clients/N200_seed_1001_meta.parquet | pass |
+| derived/clients/N200_seed_1002.parquet | pass |
+| derived/clients/N200_seed_1002_meta.parquet | pass |
+| derived/clients/N200_seed_1003.parquet | pass |
+| derived/clients/N200_seed_1003_meta.parquet | pass |
+| derived/clients/N200_seed_1004.parquet | pass |
+| derived/clients/N200_seed_1004_meta.parquet | pass |
+| derived/clients/N50_seed_1000.parquet | pass |
+| derived/clients/N50_seed_1000_meta.parquet | pass |
+| derived/clients/N50_seed_1001.parquet | pass |
+| derived/clients/N50_seed_1001_meta.parquet | pass |
+| derived/clients/N50_seed_1002.parquet | pass |
+| derived/clients/N50_seed_1002_meta.parquet | pass |
+| derived/clients/N50_seed_1003.parquet | pass |
+| derived/clients/N50_seed_1003_meta.parquet | pass |
+| derived/clients/N50_seed_1004.parquet | pass |
+| derived/clients/N50_seed_1004_meta.parquet | pass |
+| derived/splits/seed_1000.parquet | pass |
+| derived/splits/seed_1001.parquet | pass |
+| derived/splits/seed_1002.parquet | pass |
+| derived/splits/seed_1003.parquet | pass |
+| derived/splits/seed_1004.parquet | pass |
+| embeddings/dinov2_vits14/seamlessphoto.ids.npy | fail |
+| reports/audit.csv | pass |
+| reports/class_counts_mapped.csv | pass |
+| reports/class_counts_raw.csv | pass |
+| reports/clients_summary.csv | pass |
+| reports/coverage_by_layer.csv | pass |
+| reports/coverage_by_pattern.csv | pass |
+| reports/dropped_by_post_coverage.csv | pass |
+| reports/folds.csv | pass |
+| reports/imagery_decision.json | pass |
+| reports/moran.csv | pass |
+| reports/source_checks.csv | pass |
+| reports/splits_summary.csv | pass |
+<!-- /AUTO -->
 
 ## 12. Known limitations
 
