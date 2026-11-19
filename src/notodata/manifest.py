@@ -74,7 +74,8 @@ def _embedding_files() -> list[Path]:
     """CPU-built embedding files; GPU builds (`deterministic: false`) are verified by cosine."""
     out = []
     for p in _files(paths.notodata_home() / "embeddings", "*/*.npy"):
-        side = p.with_name(f"{p.name}.meta.json")
+        vectors = p.with_name(p.name.replace(".ids.npy", ".npy"))  # ids go with their vectors
+        side = vectors.with_name(f"{vectors.name}.meta.json")
         if side.exists() and json.loads(side.read_text()).get("deterministic") is False:
             continue
         out.append(p)

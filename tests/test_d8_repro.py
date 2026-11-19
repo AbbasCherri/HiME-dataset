@@ -149,3 +149,25 @@ def test_tile_fingerprint(tmp_home):
     _tile(LAYER, 18, 5, 7, b"aab")
     assert manifest.tile_fingerprint(LAYER)[0] != expected
     assert manifest.tile_fingerprint(LAYER)[1] == 2
+
+
+def _fake_embeddings(deterministic):
+    import json
+
+    folder = paths.embeddings_dir("enc")
+    folder.mkdir(parents=True)
+    (folder / f"{LAYER}.npy").write_bytes(b"vectors")
+    (folder / f"{LAYER}.ids.npy").write_bytes(b"ids")
+    (folder / f"{LAYER}.npy.meta.json").write_text(json.dumps({"deterministic": deterministic}))
+
+
+def test_a_gpu_embedding_build_is_left_out_of_the_manifest_with_its_ids(release):
+    _fake_embeddings(deterministic=False)  # the rebuild cannot make GPU files: verified by cosine
+    names = set(manifest.collect_entries([LAYER], root=release))
+    assert not {n for n in names if n.startswith("embeddings/")}
+
+
+def test_a_deterministic_embedding_build_lists_vectors_and_ids(release):
+    _fake_embeddings(deterministic=True)
+    names = set(manifest.collect_entries([LAYER], root=release))
+    assert {f"embeddings/enc/{LAYER}.npy", f"embeddings/enc/{LAYER}.ids.npy"} <= names
