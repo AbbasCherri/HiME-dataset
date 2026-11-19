@@ -1,0 +1,523 @@
+##### 1/4 setup  (2026-11-19T11:36:53Z)
+ok: git and curl
+ok: uv uv 0.13.9 (x86_64-unknown-linux-gnu)
+Checked 88 packages in 16ms
+ok: environment synced
+ok: RAM 19 GB
+ok: GPU: NVIDIA RTX A4500, 20470 MiB
+torch 2.14.1+cu130 cuda True
+ok: torch sees the GPU
+ok: gpkg present
+ok: existing data folder found (35G); finished stages will be skipped
+ok: branch build/notodata at 8819f65
+SETUP OK
+##### 2/4 data build  (2026-11-19T11:37:06Z)
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+seamlessphoto: 25117 unique tiles at zoom 18
+seamlessphoto:   0%|          | 0/25117 [00:00<?, ?tile/s]seamlessphoto: 100%|██████████| 25117/25117 [00:01<00:00, 14278.16tile/s]
+nendophoto2018: 25117 unique tiles at zoom 18
+nendophoto2018:   0%|          | 0/25117 [00:00<?, ?tile/s]nendophoto2018: 100%|██████████| 25117/25117 [00:01<00:00, 19020.69tile/s]
+nendophoto2019: 25117 unique tiles at zoom 18
+nendophoto2019:   0%|          | 0/25117 [00:00<?, ?tile/s]nendophoto2019: 100%|██████████| 25117/25117 [00:01<00:00, 18617.53tile/s]
+nendophoto2020: 25117 unique tiles at zoom 18
+nendophoto2020:   0%|          | 0/25117 [00:00<?, ?tile/s]nendophoto2020: 100%|██████████| 25117/25117 [00:01<00:00, 16651.35tile/s]
+nendophoto2021: 25117 unique tiles at zoom 18
+nendophoto2021:   0%|          | 0/25117 [00:00<?, ?tile/s]nendophoto2021: 100%|██████████| 25117/25117 [00:01<00:00, 18597.31tile/s]
+nendophoto2022: 25117 unique tiles at zoom 18
+nendophoto2022:   0%|          | 0/25117 [00:00<?, ?tile/s]nendophoto2022: 100%|██████████| 25117/25117 [00:01<00:00, 18168.27tile/s]
+20240102noto_0405_0426do: 25117 unique tiles at zoom 18
+20240102noto_0405_0426do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102noto_0405_0426do: 100%|██████████| 25117/25117 [00:01<00:00, 17721.66tile/s]
+20240102noto_wazimanishi_0117do: 25117 unique tiles at zoom 18
+20240102noto_wazimanishi_0117do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102noto_wazimanishi_0117do: 100%|██████████| 25117/25117 [00:01<00:00, 19877.55tile/s]
+20240102noto_anamizu_0117do: 25117 unique tiles at zoom 18
+20240102noto_anamizu_0117do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102noto_anamizu_0117do: 100%|██████████| 25117/25117 [00:01<00:00, 18829.40tile/s]
+20240102noto_nanao_0117do: 25117 unique tiles at zoom 18
+20240102noto_nanao_0117do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102noto_nanao_0117do: 100%|██████████| 25117/25117 [00:01<00:00, 19488.26tile/s]
+20240102noto_suzu_0114do: 25117 unique tiles at zoom 18
+20240102noto_suzu_0114do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102noto_suzu_0114do: 100%|██████████| 25117/25117 [00:01<00:00, 20179.21tile/s]
+20240102noto_wazimahigashi_0114do: 25117 unique tiles at zoom 18
+20240102noto_wazimahigashi_0114do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102noto_wazimahigashi_0114do: 100%|██████████| 25117/25117 [00:01<00:00, 19926.56tile/s]
+20240102noto_anamizu_0114do: 25117 unique tiles at zoom 18
+20240102noto_anamizu_0114do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102noto_anamizu_0114do: 100%|██████████| 25117/25117 [00:01<00:00, 19117.89tile/s]
+20240102noto_wazimanaka_0111do: 25117 unique tiles at zoom 18
+20240102noto_wazimanaka_0111do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102noto_wazimanaka_0111do: 100%|██████████| 25117/25117 [00:01<00:00, 19422.96tile/s]
+20240102noto_wazimanishi_0111do: 25117 unique tiles at zoom 18
+20240102noto_wazimanishi_0111do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102noto_wazimanishi_0111do: 100%|██████████| 25117/25117 [00:01<00:00, 19386.33tile/s]
+20240102noto_anamizu_0111do: 25117 unique tiles at zoom 18
+20240102noto_anamizu_0111do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102noto_anamizu_0111do: 100%|██████████| 25117/25117 [00:01<00:00, 19205.76tile/s]
+20240102_noto_suzu_0105do: 25117 unique tiles at zoom 18
+20240102_noto_suzu_0105do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102_noto_suzu_0105do: 100%|██████████| 25117/25117 [00:01<00:00, 19733.85tile/s]
+20240102_noto_wazimanaka_0105do: 25117 unique tiles at zoom 18
+20240102_noto_wazimanaka_0105do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102_noto_wazimanaka_0105do: 100%|██████████| 25117/25117 [00:01<00:00, 19678.81tile/s]
+20240102_noto_anamizu_0105do: 25117 unique tiles at zoom 18
+20240102_noto_anamizu_0105do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102_noto_anamizu_0105do: 100%|██████████| 25117/25117 [00:01<00:00, 19681.69tile/s]
+20240102_noto_nanao_0105do: 25117 unique tiles at zoom 18
+20240102_noto_nanao_0105do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102_noto_nanao_0105do: 100%|██████████| 25117/25117 [00:01<00:00, 18799.71tile/s]
+20240102noto_suzu_0102do: 25117 unique tiles at zoom 18
+20240102noto_suzu_0102do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102noto_suzu_0102do: 100%|██████████| 25117/25117 [00:01<00:00, 19598.76tile/s]
+20240102noto_wazimahigashi_0102do: 25117 unique tiles at zoom 18
+20240102noto_wazimahigashi_0102do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102noto_wazimahigashi_0102do: 100%|██████████| 25117/25117 [00:01<00:00, 19734.31tile/s]
+20240102noto_wazimanaka_0102do: 25117 unique tiles at zoom 18
+20240102noto_wazimanaka_0102do:   0%|          | 0/25117 [00:00<?, ?tile/s]20240102noto_wazimanaka_0102do: 100%|██████████| 25117/25117 [00:01<00:00, 19915.51tile/s]
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+INFO notodata.spatial: moran bins are (lo, hi] in metres; first bin keeps coincident distinct buildings
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+INFO notodata.cache: recompute data/derived/splits/seed_2000.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_2001.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_2002.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_2003.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_2004.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3000.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3001.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3002.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3003.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3004.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3005.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3006.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3007.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3008.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3009.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3010.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3011.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3012.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3013.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3014.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3015.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3016.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3017.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3018.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_3019.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4000.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4001.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4002.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4003.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4004.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4005.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4006.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4007.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4008.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4009.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4010.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4011.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4012.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4013.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4014.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4015.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4016.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4017.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4018.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/splits/seed_4019.parquet (data file missing)
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+INFO notodata.cache: recompute data/derived/clients/N50_seed_2000.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_2001.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_2002.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_2003.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_2004.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3000.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3001.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3002.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3003.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3004.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3005.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3006.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3007.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3008.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3009.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3010.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3011.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3012.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3013.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3014.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3015.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3016.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3017.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3018.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_3019.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4000.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4001.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4002.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4003.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4004.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4005.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4006.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4007.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4008.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4009.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4010.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4011.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4012.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4013.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4014.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4015.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4016.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4017.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4018.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N50_seed_4019.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_2000.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_2001.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_2002.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_2003.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_2004.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3000.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3001.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3002.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3003.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3004.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3005.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3006.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3007.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3008.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3009.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3010.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3011.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3012.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3013.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3014.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3015.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3016.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3017.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3018.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_3019.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4000.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4001.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4002.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4003.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4004.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4005.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4006.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4007.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4008.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4009.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4010.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4011.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4012.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4013.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4014.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4015.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4016.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4017.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4018.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N100_seed_4019.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_2000.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_2001.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_2002.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_2003.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_2004.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3000.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3001.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3002.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3003.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3004.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3005.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3006.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3007.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3008.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3009.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3010.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3011.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3012.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3013.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3014.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3015.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3016.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3017.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3018.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_3019.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4000.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4001.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4002.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4003.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4004.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4005.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4006.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4007.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4008.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4009.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4010.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4011.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4012.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4013.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4014.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4015.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4016.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4017.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4018.parquet (data file missing)
+INFO notodata.cache: recompute data/derived/clients/N200_seed_4019.parquet (data file missing)
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+##### 3/4 real embeddings (GPU)  (2026-11-19T11:45:34Z)
+=== uv sync --frozen --extra embed
+Checked 88 packages in 2ms
+=== uv run python -c import torch;print(torch.cuda.is_available())
+True
+=== uv run python -m notodata embed --encoder dinov2_vits14
+INFO notodata.cli: OMP_NUM_THREADS=1
+INFO notodata.cli: MKL_NUM_THREADS=1
+INFO notodata.cli: OPENBLAS_NUM_THREADS=1
+ALL STEPS PASSED
+##### 4/4 table, manifest, report, verify, tests  (2026-11-19T11:45:37Z)
+=== uv run python -m notodata table
+=== uv run python -m notodata manifest
+=== uv run python -m notodata report
+=== uv run python -m notodata verify --reuse-tiles
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/source.parquet (data file missing)
+/home/ubuntu-wsl-user/HiME-dataset/.venv/lib/python3.12/site-packages/pyogrio/geopandas.py:382: UserWarning: More than one layer found in 'Noto_Peninsula_Damage_2_5.gpkg': 'v2.5' (default), 'layer_styles'. Specify layer parameter to avoid this warning.
+  result = read_func(
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/labels.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/chips/seamlessphoto/index.parquet (data file missing)
+INFO notodata.chips: chips seamlessphoto: {'ok': 140208} (blank if std < 2.0 or >= 0.5 near black within 3)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/chips/nendophoto2022/index.parquet (data file missing)
+INFO notodata.chips: chips nendophoto2022: {'missing': 74030, 'ok': 64568, 'partial': 1610} (blank if std < 2.0 or >= 0.5 near black within 3)
+INFO notodata.spatial: moran bins are (lo, hi] in metres; first bin keeps coincident distinct buildings
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/folds.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_1000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_1001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_1002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_1003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_1004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_2000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_2001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_2002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_2003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_2004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3005.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3006.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3007.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3008.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3009.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3010.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3011.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3012.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3013.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3014.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3015.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3016.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3017.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3018.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_3019.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4005.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4006.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4007.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4008.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4009.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4010.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4011.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4012.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4013.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4014.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4015.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4016.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4017.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4018.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/splits/seed_4019.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_1000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_1001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_1002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_1003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_1004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_2000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_2001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_2002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_2003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_2004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3005.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3006.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3007.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3008.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3009.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3010.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3011.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3012.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3013.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3014.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3015.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3016.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3017.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3018.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_3019.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4005.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4006.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4007.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4008.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4009.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4010.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4011.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4012.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4013.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4014.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4015.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4016.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4017.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4018.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N50_seed_4019.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_1000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_1001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_1002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_1003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_1004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_2000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_2001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_2002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_2003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_2004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3005.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3006.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3007.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3008.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3009.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3010.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3011.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3012.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3013.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3014.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3015.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3016.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3017.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3018.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_3019.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4005.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4006.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4007.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4008.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4009.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4010.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4011.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4012.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4013.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4014.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4015.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4016.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4017.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4018.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N100_seed_4019.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_1000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_1001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_1002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_1003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_1004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_2000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_2001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_2002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_2003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_2004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3005.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3006.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3007.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3008.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3009.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3010.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3011.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3012.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3013.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3014.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3015.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3016.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3017.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3018.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_3019.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4005.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4006.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4007.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4008.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4009.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4010.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4011.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4012.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4013.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4014.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4015.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4016.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4017.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4018.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/clients/N200_seed_4019.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/buildings.parquet (data file missing)
+INFO notodata.table: wrote /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmpthrz_qbq/home/derived/buildings.parquet (140208 rows)
+=== uv run pytest -q -rs
+........................................................................ [ 19%]
+........................................................................ [ 38%]
+........................................................................ [ 58%]
+........................................................................ [ 77%]
+........................................................................ [ 96%]
+............                                                             [100%]
+372 passed in 102.29s (0:01:42)
+ALL STEPS PASSED
+##### ALL DONE. Send me reports/run_all.log (and reports/finish_release.log).
