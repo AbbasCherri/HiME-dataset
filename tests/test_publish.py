@@ -46,13 +46,18 @@ def _touch(path, text="x"):
     path.write_text(text)
 
 
+def _decision(pre_available):
+    fields = {"post_layer": "seamlessphoto", "pre_layer": "nendophoto2022"}
+    return json.dumps({**fields, "n_kept": 140208, "pre_available": pre_available})
+
+
 @pytest.fixture
 def release(tmp_home, tmp_path):
     """A finished-looking release: root with reports and manifest, plus a populated home."""
     root = tmp_path / "repo"
     reports = root / "reports"
     _touch(reports / "verify_result.json", json.dumps({"status": "pass"}))
-    _touch(reports / "imagery_decision.json", json.dumps({"n_kept": 140208}))
+    _touch(reports / "imagery_decision.json", _decision(pre_available=False))
     _touch(reports / "folds.csv", "a,b\n")
     _touch(reports / "publish.log", "log")
     _touch(reports / "run.jsonl", "log")
@@ -75,6 +80,9 @@ def release(tmp_home, tmp_path):
         "audit/marks.csv",
         "chips/seamlessphoto/1/1001.png",
         "tiles/seamlessphoto/18/1/2.jpg",
+        "chips/20240102noto_0405_0426do/1/1001.png",
+        "tiles/20240102noto_0405_0426do/18/1/2.png",
+        "chips/nendophoto2022/1/1001.png",
     ):
         _touch(tmp_home / rel)
     api = FakeApi()
@@ -194,7 +202,8 @@ def test_imagery_only_with_flag_and_never_the_audit_dir(release, token, tmp_home
     assert big["repo_id"] == HF_DATASET_REPO_ID
     assert big["repo_type"] == "dataset"
     assert big["folder_path"] == str(tmp_home)
-    assert sorted(big["allow_patterns"]) == ["chips/**", "tiles/**"]
+    # only the layer the dataset uses: not the other candidates, not the unavailable pre layer
+    assert sorted(big["allow_patterns"]) == ["chips/seamlessphoto/**", "tiles/seamlessphoto/**"]
     assert "audit/**" in big["ignore_patterns"]
     assert "**/key.csv" in big["ignore_patterns"]
     assert not [p for p in api.committed_paths() if p.startswith(("chips/", "tiles/"))]
@@ -204,9 +213,19 @@ def test_dry_run_with_imagery_summarises_without_uploading(release, capsys):
     ctx, api, _ = release
     assert run(ctx, "--include-imagery") == cli.EXIT_OK
     out = capsys.readouterr().out
-    assert "chips" in out
-    assert "tiles" in out
+    assert "chips/seamlessphoto" in out
+    assert "tiles/seamlessphoto" in out
+    assert "20240102noto_0405_0426do" not in out
+    assert "nendophoto2022" not in out
     assert api.calls == []
+
+
+def test_a_layer_the_dataset_uses_as_pre_is_published_only_when_available(release, tmp_home):
+    from notodata import publish
+
+    (release[2] / "reports" / "imagery_decision.json").write_text(_decision(pre_available=True))
+    rels = {part.rel for part in publish.imagery_parts(True, release[2])}
+    assert rels == {"chips/seamlessphoto", "tiles/seamlessphoto", "chips/nendophoto2022"}
 
 
 def test_real_upload_without_token_is_a_clear_error(release, capsys, monkeypatch):

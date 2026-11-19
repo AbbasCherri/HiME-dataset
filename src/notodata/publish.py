@@ -91,6 +91,15 @@ def plan(root: Path) -> list[Item]:
     return sorted([*small_files(root), Item(CARD_NAME, len(card.encode()), Path(CARD_NAME))])
 
 
+def imagery_layers(root: Path) -> list[str]:
+    """The layers the dataset uses: the post layer, and the pre layer only if it is available."""
+    decision = json.loads((paths.reports_dir(root) / "imagery_decision.json").read_text())
+    layers = [decision["post_layer"]]
+    if decision.get("pre_available"):
+        layers.append(decision["pre_layer"])
+    return layers
+
+
 def _imagery_part(name: str) -> ImageryPart | None:
     files = [p for p in (paths.notodata_home() / name).rglob("*") if p.is_file()]
     files = [p for p in files if p.suffix != ".tmp"]
@@ -99,9 +108,13 @@ def _imagery_part(name: str) -> ImageryPart | None:
     return ImageryPart(name, len(files), sum(p.stat().st_size for p in files))
 
 
-def imagery_parts(include: bool) -> list[ImageryPart]:
-    """The imagery directories that exist under `NOTODATA_HOME` (empty unless `include`)."""
-    found = [_imagery_part(name) for name in IMAGERY_DIRS] if include else []
+def imagery_parts(include: bool, root: Path) -> list[ImageryPart]:
+    """Per-layer chip and tile folders under `NOTODATA_HOME` (empty unless `include`).
+
+    Only the layers the dataset uses: the fetch also holds every candidate layer.
+    """
+    names = [f"{d}/{layer}" for layer in imagery_layers(root) for d in IMAGERY_DIRS]
+    found = [_imagery_part(name) for name in names] if include else []
     return [part for part in found if part is not None]
 
 
@@ -237,7 +250,7 @@ def _commit(api: Any, root: Path, items: list[Item]) -> None:
 def upload(
     root: Path,
     items: list[Item],
-    include_imagery: bool,
+    imagery: list[ImageryPart],
     api_factory: Callable[[], Any] | None = None,
 ) -> None:
     """Create the repo if absent (private), commit `items`, then the imagery folders if asked."""
@@ -249,11 +262,11 @@ def upload(
         exist_ok=True,
     )
     _commit(api, root, items)
-    if include_imagery:
+    if imagery:
         api.upload_large_folder(
             repo_id=HF_DATASET_REPO_ID,
             repo_type="dataset",
             folder_path=str(paths.notodata_home()),
-            allow_patterns=[f"{name}/**" for name in IMAGERY_DIRS],
+            allow_patterns=[f"{part.rel}/**" for part in imagery],
             ignore_patterns=[*_NEVER, *_TEMP],
         )

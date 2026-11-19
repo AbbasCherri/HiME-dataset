@@ -934,7 +934,7 @@ def stage_publish(ctx: Context, args) -> int:
         print(f"error: {blocked[1]}", file=sys.stderr)
         return EXIT_VERIFY_FAILED if blocked[0] == "failed" else EXIT_MISSING_INPUT
     items = publish.plan(ctx.root)
-    parts = publish.imagery_parts(args.include_imagery)
+    parts = publish.imagery_parts(args.include_imagery, ctx.root)
     _print_plan(items, parts)
     if not args.yes:
         print("dry run: nothing uploaded; pass --yes to upload")
@@ -943,7 +943,7 @@ def stage_publish(ctx: Context, args) -> int:
         return EXIT_OK
     if not os.environ.get("HF_TOKEN"):
         raise CliError("HF_TOKEN is not set; put it in .env or export it, then rerun with --yes")
-    publish.upload(ctx.root, items, bool(parts), ctx.hf_api_factory)
+    publish.upload(ctx.root, items, parts, ctx.hf_api_factory)
     visibility = "private" if HF_REPO_PRIVATE_ON_CREATE else "public"
     print(f"uploaded to https://huggingface.co/datasets/{HF_DATASET_REPO_ID}")
     print(f"a repo created by this run is {visibility}; change visibility on the Hub")
