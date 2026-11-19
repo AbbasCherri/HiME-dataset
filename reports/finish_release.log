@@ -1,0 +1,45 @@
+=== uv run python -m notodata table
+=== uv run python -m notodata manifest
+=== uv run python -m notodata report
+=== uv run python -m notodata verify --reuse-tiles
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/source.parquet (data file missing)
+/home/ubuntu-wsl-user/HiME-dataset/.venv/lib/python3.12/site-packages/pyogrio/geopandas.py:382: UserWarning: More than one layer found in 'Noto_Peninsula_Damage_2_5.gpkg': 'v2.5' (default), 'layer_styles'. Specify layer parameter to avoid this warning.
+  result = read_func(
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/labels.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/chips/seamlessphoto/index.parquet (data file missing)
+INFO notodata.chips: chips seamlessphoto: {'ok': 140208} (blank if std < 2.0 or >= 0.5 near black within 3)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/chips/nendophoto2022/index.parquet (data file missing)
+INFO notodata.chips: chips nendophoto2022: {'missing': 74030, 'ok': 64568, 'partial': 1610} (blank if std < 2.0 or >= 0.5 near black within 3)
+INFO notodata.spatial: moran bins are (lo, hi] in metres; first bin keeps coincident distinct buildings
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/folds.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/splits/seed_1000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/splits/seed_1001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/splits/seed_1002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/splits/seed_1003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/splits/seed_1004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N50_seed_1000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N50_seed_1001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N50_seed_1002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N50_seed_1003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N50_seed_1004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N100_seed_1000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N100_seed_1001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N100_seed_1002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N100_seed_1003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N100_seed_1004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N200_seed_1000.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N200_seed_1001.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N200_seed_1002.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N200_seed_1003.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/clients/N200_seed_1004.parquet (data file missing)
+INFO notodata.cache: recompute /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/buildings.parquet (data file missing)
+INFO notodata.table: wrote /home/ubuntu-wsl-user/HiME-dataset/data/verify_tmp/tmp8i039jdm/home/derived/buildings.parquet (140208 rows)
+=== uv run pytest -q -rs
+........................................................................ [ 19%]
+........................................................................ [ 38%]
+........................................................................ [ 58%]
+........................................................................ [ 77%]
+........................................................................ [ 97%]
+...........                                                              [100%]
+371 passed in 101.87s (0:01:41)
+ALL STEPS PASSED
