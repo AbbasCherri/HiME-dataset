@@ -981,8 +981,12 @@ def stage_build(ctx: Context, args) -> int:
             "`audit-ingest --rater <name> --date <date>`; then run `build` again."
         )
         return EXIT_OK
-    for argv in (["imagery"], ["spatial"], ["folds"], ["splits"], ["clients"], ["table"],
-                 ["manifest"], ["report"]):  # fmt: skip
+    from notodata.config import RELEASE_SEEDS
+
+    seeds = [str(s) for s in RELEASE_SEEDS]
+    for argv in (["imagery"], ["spatial"], ["folds"], ["splits", "--seeds", *seeds],
+                 ["clients", "--seeds", *seeds], ["table"], ["manifest"],
+                 ["report"]):  # fmt: skip
         _run_or_stop(argv, ctx)
     return EXIT_OK
 

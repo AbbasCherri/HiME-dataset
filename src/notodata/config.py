@@ -25,6 +25,14 @@ inconsistent" footprint. Quoted in DATASET.md and notes/phase0.md.
 """
 
 CLIENT_COUNTS: tuple[int, ...] = (50, 100, 200)
+
+RELEASE_SEEDS: tuple[int, ...] = (
+    *range(1000, 1005),  # development
+    *range(2000, 2005),  # tuning
+    *range(3000, 3020),  # confirmation
+    *range(4000, 4020),  # replication
+)
+"""Every seed the release ships; DATASET.md deviation 5."""
 """Client counts N built by default (DATASET.md deviation row 4)."""
 
 GSI_XYZ_BASE: str = "https://cyberjapandata.gsi.go.jp/xyz"

@@ -297,3 +297,22 @@ def test_verify_staging_copies_only_the_tiles_of_the_layers_it_rebuilds(env, tmp
     home, _ = cli._stage_verify_inputs(ctx, stage, True, ["wanted"])
     assert (home / "tiles" / "wanted" / "18" / "1" / "2.png").exists()
     assert not (home / "tiles" / "other").exists()
+
+
+def test_build_makes_splits_and_clients_for_every_release_seed(env, monkeypatch):
+    import argparse
+
+    from notodata.config import RELEASE_SEEDS
+
+    assert len(RELEASE_SEEDS) == 50
+    assert RELEASE_SEEDS[0] == 1000
+    assert RELEASE_SEEDS[-1] == 4019
+    (env.root / "reports").mkdir(exist_ok=True)
+    (env.root / "reports" / "imagery_decision.json").write_text("{}")
+    calls = []
+    monkeypatch.setattr(cli, "_run_or_stop", lambda argv, ctx: calls.append(argv))
+    assert cli.stage_build(cli.Context(root=env.root), argparse.Namespace(layers="")) == 0
+    by_stage = {argv[0]: argv for argv in calls}
+    expected = [str(s) for s in RELEASE_SEEDS]
+    assert by_stage["splits"][2:] == expected
+    assert by_stage["clients"][2:] == expected
