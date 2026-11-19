@@ -166,7 +166,7 @@ def _files_section() -> str:
             " JSON sidecars)",
             "- `MANIFEST.sha256`: SHA-256 of every derived file, `sha256sum` format",
             "- `reports/`: CSV and JSON reports, including `verify_result.json`",
-            "- `chips/` and `tiles/`: only if the imagery was uploaded too",
+            "- `chips/` and `tiles/`: the GSI imagery (`chips/` crops, `tiles/` source tiles)",
             "",
         ]
     )
@@ -181,8 +181,10 @@ def _sources_section() -> str:
             f"- Zenodo `{b.concept_doi}`, `{b.filename}` ({b.licence}); Vescovo et al. 2025,"
             f" doi:{b.paper_doi}",
             f"- USGS ShakeMap `{s.event_id}`, version {s.version} ({s.licence})",
-            "- Imagery: Geospatial Information Authority of Japan (GSI) tiles; the terms of use"
-            " and attribution wording are recorded in DATASET.md below",
+            "- Imagery: Geospatial Information Authority of Japan (GSI) tiles, Public Data"
+            " License 1.0 (compatible with CC-BY-4.0). Source: GSI website"
+            " (https://maps.gsi.go.jp/). Chips were created by editing GSI Tiles; the full"
+            " attribution is in DATASET.md, section 10",
             "",
         ]
     )

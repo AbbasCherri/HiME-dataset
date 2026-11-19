@@ -716,9 +716,28 @@ Moran's I sample, fold balancing, audit sample: why each is dataset-level.
 
 ## 10. Licence and redistribution
 
-HF dataset licence (quoted). GSI terms (quoted attribution wording).
-Policy: tiles and chips are fetched at build time, cached locally,
-git-ignored, never redistributed.
+The dataset card is licensed **CC-BY-4.0**. The building labels come from Vescovo et
+al. 2025 (CC-BY-4.0, Zenodo) and the intensity grid from the USGS ShakeMap
+(public domain).
+
+**Imagery.** Chips and tiles are uploaded to the Hugging Face dataset repository
+together with the tables. They come from the Geospatial Information Authority of
+Japan (GSI) tile service and are subject to GSI's content terms, the Public Data
+License 1.0 (PDL 1.0), which is compatible with CC-BY-4.0
+(<https://www.gsi.go.jp/ENGLISH/page_e30286.html>). GSI requires that users "must
+cite the source when using the content" and that edited content carries the source
+plus a statement that it was edited. The wording for this dataset:
+
+> Source: GSI website (<https://maps.gsi.go.jp/>), GSI Tiles (seamlessphoto,
+> nendophoto2022). Chips were created by editing GSI Tiles (cropped around each
+> building and resampled).
+
+The chips must not be presented in a way that suggests GSI produced them. The GSI
+page says users are responsible for confirming third-party rights in the content
+they use; this was not independently audited for individual photographs. The terms page is a reference translation and the Japanese version is the
+official text. The git repository still never contains imagery: `data/` is
+git-ignored, and tiles and chips reach the Hugging Face repository only through
+`scripts/publish.sh --include-imagery`.
 
 ## 11. Reproducibility
 

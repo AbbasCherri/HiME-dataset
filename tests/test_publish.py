@@ -250,6 +250,8 @@ def test_card_front_matter_parses_as_yaml_and_embeds_dataset_md(release):
     assert "CC-BY-4.0" in body
     assert "US Public Domain" in body
     assert "GSI" in body
+    assert "Public Data License 1.0" in body
+    assert "editing GSI Tiles" in body
 
 
 def test_card_is_uploaded_as_readme_with_the_card_text(release, token):
