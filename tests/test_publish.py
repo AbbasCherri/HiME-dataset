@@ -26,8 +26,8 @@ class FakeApi:
     def create_commit(self, **kwargs):
         self.calls.append(("create_commit", kwargs))
 
-    def upload_large_folder(self, **kwargs):
-        self.calls.append(("upload_large_folder", kwargs))
+    def upload_folder(self, **kwargs):
+        self.calls.append(("upload_folder", kwargs))
 
     def named(self, name: str) -> list[dict]:
         return [kw for n, kw in self.calls if n == name]
@@ -192,13 +192,13 @@ def test_yes_creates_private_repo_and_commits_expected_paths(release, token):
     assert "MANIFEST.sha256" in paths
     assert not [p for p in paths if "audit" in p.split("/") or p.endswith("key.csv")]
     assert not [p for p in paths if p.startswith(("chips/", "tiles/"))]
-    assert api.named("upload_large_folder") == []
+    assert api.named("upload_folder") == []
 
 
 def test_imagery_only_with_flag_and_never_the_audit_dir(release, token, tmp_home):
     ctx, api, _ = release
     assert run(ctx, "--yes", "--include-imagery") == cli.EXIT_OK
-    (big,) = api.named("upload_large_folder")
+    (big,) = api.named("upload_folder")
     assert big["repo_id"] == HF_DATASET_REPO_ID
     assert big["repo_type"] == "dataset"
     assert big["folder_path"] == str(tmp_home)
@@ -299,3 +299,16 @@ def test_refuses_malformed_verify_result(release, capsys, text):
     assert run(ctx, "--yes") == cli.EXIT_VERIFY_FAILED
     assert "verify" in capsys.readouterr().err
     assert api.calls == []
+
+
+def test_every_call_to_the_hub_matches_the_real_hfapi_signature(release, token):
+    """The fake once accepted a method huggingface_hub no longer has; check the real one."""
+    import inspect
+
+    from huggingface_hub import HfApi
+
+    ctx, api, _ = release
+    assert run(ctx, "--yes", "--include-imagery") == cli.EXIT_OK
+    assert {name for name, _ in api.calls} == {"create_repo", "create_commit", "upload_folder"}
+    for name, kwargs in api.calls:
+        inspect.signature(getattr(HfApi, name)).bind(object(), **kwargs)  # raises if it would fail

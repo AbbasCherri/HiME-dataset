@@ -263,7 +263,7 @@ def upload(
     )
     _commit(api, root, items)
     if imagery:
-        api.upload_large_folder(
+        api.upload_folder(
             repo_id=HF_DATASET_REPO_ID,
             repo_type="dataset",
             folder_path=str(paths.notodata_home()),
